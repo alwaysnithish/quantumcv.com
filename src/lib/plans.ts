@@ -13,7 +13,7 @@ export const PLANS: Record<
   pro: {
     credits: 30, // 5 resume generations (5 credits each = 25) + 5 bonus credits for AI chat-edit/enhance
     resumeCount: 5,
-    price: { INR: 99, USD: 4.99 },
+    price: { INR: 99, USD: 3.99 },
   },
 };
 
