@@ -864,7 +864,7 @@ const SET_2: Omit<ResumeTemplate, 'premium'>[] = [
     render(data, ac) {
       return `
       <div style="font-family:monospace;border-bottom:1px solid ${ac};padding-bottom:11px;margin-bottom:12px;min-width:0">
-        <div style="font-size:0.68rem;color:#64748b;margin-bottom:3px">// resume.json → parsed successfully ✓</div>
+        <div style="font-size:0.68rem;color:#64748b;margin-bottom:3px"></div>
         <div style="font-size:1.7rem;font-weight:700;color:#0f172a;font-family:monospace;letter-spacing:-.02em;word-break:break-word">${editableName(data)}</div>
         ${
           data.target_role
