@@ -1,0 +1,187 @@
+/* src/app/builder/canvas.css
+   Port of the interactive-element styles from the original builder.css:
+   section controls, drag handles, bullet/skill enhance buttons, table
+   resize handle, chat panel, template gallery, toasts. */
+
+[data-sec-id] { position: relative; }
+[data-sec-id]:hover .sec-controls { opacity: 1; }
+[data-sec-id]:hover .sec-drag-handle { opacity: 1; }
+
+.sec-controls {
+  position: absolute;
+  right: -40px;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.sec-ctrl-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.sec-ctrl-btn:hover { background: #f1f5f9; color: #0f172a; }
+.sec-ctrl-btn.del:hover { background: #fef2f2; border-color: #ef4444; color: #ef4444; }
+
+.sec-drag-handle {
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: grab;
+  color: #cbd5e1;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  padding: 4px;
+}
+.sec-drag-handle:active { cursor: grabbing; }
+
+[data-sec-id].dragging { opacity: 0.4; }
+[data-sec-id].drag-over { outline: 2px dashed #2563eb; border-radius: 6px; }
+[data-sec-id].flash { animation: flash-highlight 1.2s ease; }
+@keyframes flash-highlight {
+  0% { background: rgba(37,99,235,0.08); }
+  100% { background: transparent; }
+}
+
+.bullet-actions { display: none; gap: 3px; align-items: center; flex-shrink: 0; }
+.bullet-enhance-btn {
+  font-size: 0.62rem;
+  padding: 2px 6px;
+  border: 1.5px solid #bfdbfe;
+  border-radius: 5px;
+  background: #eff6ff;
+  color: #2563eb;
+  cursor: pointer;
+  white-space: nowrap;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+.bullet-enhance-btn:hover { background: #2563eb; color: white; }
+
+.skill-enhance-btn {
+  font-size: 0.6rem;
+  padding: 1px 5px;
+  border: 1px solid #e2e8f0;
+  border-radius: 5px;
+  background: none;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.skill-enhance-btn:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+
+.add-item-btn {
+  width: 100%;
+  padding: 6px;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 6px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.76rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 4px;
+}
+.add-item-btn:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+
+.tbl-resize:hover { background: #2563eb44; }
+
+/* Skill bars in resume — these were missing, causing bars to render with no visible shape */
+.rp-sbar-item { margin-bottom: 5px; }
+.rp-sbar-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3px;
+}
+.rp-sbar-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  outline: none;
+  cursor: text;
+}
+.rp-sbar-right { display: flex; align-items: center; gap: 5px; }
+.rp-sbar-pct { font-size: 0.65rem; color: #94a3b8; font-family: monospace; }
+.rp-sbar-track {
+  height: 5px;
+  background: #e2e8f0;
+  border-radius: 99px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.rp-sbar-fill { height: 100%; border-radius: 99px; transition: width 0.15s ease; }
+
+/* Skill dots — same issue, no CSS shape was defined */
+.rp-sdot-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.rp-sdot-name { font-size: 0.78rem; font-weight: 600; flex: 1; outline: none; cursor: text; }
+.rp-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  border: 1.5px solid #cbd5e1;
+  background: transparent;
+  display: inline-block;
+}
+.rp-dot.filled { background: currentColor; border-color: currentColor; }
+.rp-dot:hover { transform: scale(1.3); }
+
+.skill-step-btn, .skill-move-btn {
+  font-size: 0.6rem;
+  width: 15px;
+  height: 15px;
+  line-height: 1;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background: none;
+  color: #64748b;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.skill-step-btn:hover, .skill-move-btn:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+
+/* Toasts */
+#toast-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+.toast {
+  background: #0f172a;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 1;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.toast.out { opacity: 0; transform: translateY(8px); }
+.toast-success { background: #166534; }
+.toast-error { background: #991b1b; }
