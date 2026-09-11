@@ -280,14 +280,14 @@ function looksLikeDateLine(line: string): boolean {
 
 function looksLikeLocation(line: string): boolean {
   return (
-    /^(?:📍|location)\s*/i.test(line) ||
+    /^(?:|location)\s*/i.test(line) ||
     /,\s*[A-Z]{2}(?:,|\s*$)/.test(line) ||
     /\b(remote|hybrid)\b/i.test(line)
   );
 }
 
 function cleanLocation(line: string): string {
-  return line.replace(/^📍\s*/, '').replace(/^location\s*:\s*/i, '').trim();
+  return line.replace(/^\s*/, '').replace(/^location\s*:\s*/i, '').trim();
 }
 
 function cleanSubLabel(line: string): string {
