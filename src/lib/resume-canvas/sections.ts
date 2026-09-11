@@ -114,7 +114,7 @@ export function entryHtml(en: AnyData, ac: string, secId: string, compact = fals
     >${esc(en.subtitle)}</div>`
         : ''
     }
-    ${en.location ? `<div contenteditable="false" style="font-size:0.67rem;color:#94a3b8;margin-bottom:2px">📍 ${esc(en.location)}</div>` : ''}
+    ${en.location ? `<div contenteditable="false" style="font-size:0.67rem;color:#94a3b8;margin-bottom:2px"> ${esc(en.location)}</div>` : ''}
     ${(en.bullets || [])
       .map(
         (b: string, bi: number) => `
