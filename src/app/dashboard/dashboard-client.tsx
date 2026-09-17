@@ -112,7 +112,7 @@ export default function DashboardClient({
       <header className="border-b border-[var(--border)] bg-[var(--bg)]/90 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center font-bold text-white text-sm">Q</div>
+<img src="/logo.png" alt="QuantumCV" className="w-8 h-8 rounded-full" />
             <span className="font-extrabold tracking-tight hidden sm:inline">QuantumCV</span>
           </Link>
 

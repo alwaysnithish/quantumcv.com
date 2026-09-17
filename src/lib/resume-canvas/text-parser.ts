@@ -835,6 +835,29 @@ function looksLikeBareDate(line: string): boolean {
  * and a blank line (or a fresh title once the entry already has a date)
  * starts the next entry.
  */
+/** Given the text after a title separator ("Issuer (2024)", "Issuer, 2024", "Issuer · 2024"),
+ *  pulls a trailing year out (parens or bare) and returns the issuer name without it. */
+function splitIssuerAndDate(rest: string): { issuer: string; date: string } {
+  const parenMatch = rest.match(/\(([^)]*)\)\s*$/);
+  if (parenMatch && /\d{4}|present|current|now/i.test(parenMatch[1])) {
+    return { issuer: rest.slice(0, parenMatch.index).trim(), date: parenMatch[1].trim() };
+  }
+  const trailingYear = rest.match(/[,·]?\s*((?:19|20)\d{2})\s*$/);
+  if (trailingYear && trailingYear.index !== undefined) {
+    return { issuer: rest.slice(0, trailingYear.index).trim(), date: trailingYear[1] };
+  }
+  return { issuer: rest.trim(), date: '' };
+}
+
+/**
+ * Certifications show up in two very different shapes and this has to handle both:
+ *  (a) one self-contained line per cert — "AWS Certified Developer | Amazon Web Services (2024)"
+ *  (b) a 3-line block per cert — name, then issuer, then a bare year, each on its own line
+ * A line containing a separator (| , — , or ·) is always a complete, self-contained entry on
+ * its own — it must never be merged with a neighboring line. Anything else falls back to the
+ * block-grouping logic: first line is the title, second is the issuer, a date-looking line
+ * closes the entry, and a fresh non-date line after that starts the next one.
+ */
 function parseCertificationEntries(lines: string[]): ParsedEntry[] {
   const entries: ParsedEntry[] = [];
   let current: ParsedEntry | null = null;
@@ -850,8 +873,25 @@ function parseCertificationEntries(lines: string[]): ParsedEntry[] {
     const line = stripBullet(raw).trim();
 
     if (!line) {
-      // Blank line = explicit separator between certifications.
+      // Blank line = explicit separator between certifications (kept as a safety net —
+      // block-splitting upstream currently strips these before they get here).
       finish();
+      continue;
+    }
+
+    const parts = line.split(/\s*\|\s*|\s+—\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      // Self-contained single line — never merge this into whatever came before it.
+      finish();
+      const { issuer, date } = splitIssuerAndDate(parts.slice(1).join(' — '));
+      entries.push({
+        id: uid('e'),
+        title: parts[0].trim(),
+        subtitle: issuer,
+        date_start: date,
+        date_end: '',
+        bullets: [],
+      });
       continue;
     }
 

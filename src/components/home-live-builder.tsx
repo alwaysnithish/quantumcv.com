@@ -486,19 +486,20 @@ export default function HomeLiveBuilder() {
           <div className="flex-1 overflow-y-auto p-4">
             {tab === 'generate' && (
               <>
-                <label className="text-xs font-semibold text-[var(--fg-muted)] uppercase tracking-wide">Career data</label>
+                <label className="text-xs font-semibold text-[var(--fg-muted)] uppercase tracking-wide" >Career data</label>
                 <textarea
-                  value={careerData}
-                  onChange={(e) => setCareerData(e.target.value)}
-                  rows={9}
-                  className="mt-1.5 w-full resize-none rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2.5 text-[12.5px] leading-relaxed focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-                />
+  value={careerData}
+  readOnly
+  rows={9}
+  className="mt-1.5 w-full resize-none rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2.5 text-[12.5px] leading-relaxed focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+/>
                 <div className="mt-3 grid grid-cols-2 gap-2.5">
                   <div>
                     <label className="text-xs font-semibold text-[var(--fg-muted)] uppercase tracking-wide">Target role</label>
                     <input
                       type="text"
                       value={role}
+                        readOnly
                       onChange={(e) => setRole(e.target.value)}
                       className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
                     />
@@ -506,7 +507,9 @@ export default function HomeLiveBuilder() {
                   <div>
                     <label className="text-xs font-semibold text-[var(--fg-muted)] uppercase tracking-wide">Country</label>
                     <select
-                      value={country}
+                      value={country} 
+                      readOnly
+                      
                       onChange={(e) => setCountry(e.target.value)}
                       className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
                     >

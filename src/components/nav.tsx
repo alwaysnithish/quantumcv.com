@@ -27,7 +27,7 @@ export default function Nav() {
     <header className="sticky top-0 z-50 backdrop-blur-md bg-[var(--bg)]/80 border-b border-[var(--border)]">
       <nav className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center font-bold text-white text-sm">Q</div>
+       <img src="/logo.png" alt="QuantumCV" className="w-8 h-8 rounded-full" />
           <span className="font-extrabold tracking-tight text-[var(--fg)]">QuantumCV</span>
         </Link>
 

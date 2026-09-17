@@ -70,33 +70,54 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#071133] to-[#0b1220] text-[var(--fg)]">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
       <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
-           <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-[var(--accent)] to-[#7dd3fc] flex items-center justify-center text-white font-extrabold shadow-lg">Q</div>
-              <div>
-                <div className="text-sm text-white/70">QuantumCV</div>
-                <div className="text-xs text-white/40">AI · ATS · Professional</div>
+          {/* Left: brand, headline, feature grid */}
+          <div className="flex flex-col justify-center gap-8">
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <img src="/logo.png" alt="" className="w-12 h-12 rounded-xl shadow-lg" />
+                <div>
+                  <div className="text-sm font-semibold">QuantumCV</div>
+                  <div className="text-xs text-[var(--fg-muted)]">AI · ATS · Professional</div>
+                </div>
               </div>
+
+              <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight">
+                Build a resume from your <span className="text-[var(--accent)]">raw career data</span>
+              </h1>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight text-white">
-              Build a resume from your <span className="text-[var(--accent)]">raw career data</span>
-            </h1>
+            <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
+              {FEATURES.slice(0, 4).map((f) => (
+                <div key={f.title} className="flex gap-3 items-start rounded-xl border border-[var(--border)] p-3 hover:border-[var(--accent)]/40 hover:shadow-lg transition-all">
+                  <div className="w-8 h-8 shrink-0 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center">
+                    <f.Icon size={16} strokeWidth={1.75} className="text-[var(--accent)]" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold">{f.title}</div>
+                    <div className="text-xs text-[var(--fg-muted)]">{f.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-          {/* Right auth card */}
+            <div className="hidden sm:block">
+              <img src="/assets/login-illustration.svg" alt="" className="w-full max-w-md opacity-90" />
+            </div>
+          </div>
+
+          {/* Right: auth card */}
           <div className="flex justify-center">
-            <div className="w-full max-w-md bg-white/5 backdrop-blur-md border border-white/8 rounded-2xl p-8 shadow-xl">
+            <div className="w-full max-w-md bg-[var(--bg-subtle)] border border-[var(--border)] rounded-2xl p-8 shadow-xl">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-extrabold text-white mb-0">{step === 'email' ? 'Welcome back' : 'Enter verification code'}</h2>
-                  <p className="text-sm text-white/60">{step === 'email' ? "Sign in quickly — we'll email a one-time code." : `Code sent to ${email}`}</p>
+                  <h2 className="text-2xl font-extrabold mb-0">{step === 'email' ? 'Welcome back' : 'Enter verification code'}</h2>
+                  <p className="text-sm text-[var(--fg-muted)]">{step === 'email' ? "Sign in quickly — we'll email a one-time code." : `Code sent to ${email}`}</p>
                 </div>
-                <div className="hidden lg:flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center text-white font-bold">Q</div>
-                </div>
+                <img src="/logo.png" alt="" className="hidden lg:block w-10 h-10 rounded-full shadow" />
               </div>
 
               {message && (
@@ -110,9 +131,9 @@ export default function LoginPage() {
                   <>
                     <GoogleSignInButton />
                     <div className="flex items-center gap-3 my-2">
-                      <div className="h-px bg-white/8 flex-1" />
-                      <span className="text-xs text-white/60">or continue with email</span>
-                      <div className="h-px bg-white/8 flex-1" />
+                      <div className="h-px bg-[var(--border)] flex-1" />
+                      <span className="text-xs text-[var(--fg-muted)]">or continue with email</span>
+                      <div className="h-px bg-[var(--border)] flex-1" />
                     </div>
                   </>
                 )}
@@ -126,13 +147,16 @@ export default function LoginPage() {
                       placeholder="you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-full border border-white/10 bg-transparent px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                      className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-4 py-2.5 text-sm placeholder:text-[var(--fg-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)]"
                       aria-label="Email address"
                     />
-                    <button disabled={loading} className="w-full rounded-full bg-[var(--accent)] text-white font-semibold py-2.5 text-sm hover:bg-[var(--accent-hover)] disabled:opacity-50 transition">
+                    <button
+                      disabled={loading}
+                      className="w-full rounded-lg bg-[var(--accent)] text-white font-semibold py-2.5 text-sm hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors shadow-lg hover:shadow-xl"
+                    >
                       {loading ? 'Sending…' : 'Send verification code'}
                     </button>
-                    <div className="text-center text-xs text-white/50">No password required. We’ll email a secure code.</div>
+                    <div className="text-center text-xs text-[var(--fg-muted)]">No password required. We’ll email a secure code.</div>
                   </form>
                 ) : (
                   <form onSubmit={verify} className="space-y-4">
@@ -144,7 +168,7 @@ export default function LoginPage() {
                       maxLength={6}
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
-                      className="w-full rounded-full border border-white/10 bg-transparent px-4 py-2.5 text-sm tracking-[0.3em] text-center font-mono text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                      className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-4 py-2.5 text-sm tracking-[0.3em] text-center font-mono placeholder:text-[var(--fg-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)]"
                       aria-label="Verification code"
                     />
 
@@ -153,48 +177,27 @@ export default function LoginPage() {
                       placeholder="Full name (first time only)"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="w-full rounded-full border border-white/10 bg-transparent px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                      className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-4 py-2.5 text-sm placeholder:text-[var(--fg-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)]"
                     />
 
-                    <button disabled={loading} className="w-full rounded-full bg-[var(--accent)] text-white font-semibold py-2.5 text-sm hover:bg-[var(--accent-hover)] disabled:opacity-50 transition">
+                    <button
+                      disabled={loading}
+                      className="w-full rounded-lg bg-[var(--accent)] text-white font-semibold py-2.5 text-sm hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors shadow-lg hover:shadow-xl"
+                    >
                       {loading ? 'Verifying…' : 'Verify & sign in'}
                     </button>
 
-                    <div className="flex justify-between text-xs text-white/60">
-                      <button type="button" onClick={() => setStep('email')} className="hover:text-white transition">← Change email</button>
-                      <button type="button" onClick={resend} className="hover:text-white transition">Resend code</button>
+                    <div className="flex justify-between text-xs text-[var(--fg-muted)]">
+                      <button type="button" onClick={() => setStep('email')} className="hover:text-[var(--fg)] transition-colors">← Change email</button>
+                      <button type="button" onClick={resend} className="hover:text-[var(--fg)] transition-colors">Resend code</button>
                     </div>
                   </form>
                 )}
               </div>
 
-              <div className="mt-6 text-center text-xs text-white/50">
-                By signing in you agree to our <Link href="/terms" className="underline">Terms</Link> and <Link href="/privacy" className="underline">Privacy Policy</Link>.
+              <div className="mt-6 text-center text-xs text-[var(--fg-muted)]">
+                By signing in you agree to our <Link href="/terms" className="underline hover:text-[var(--fg)]">Terms</Link> and <Link href="/privacy" className="underline hover:text-[var(--fg)]">Privacy Policy</Link>.
               </div>
-            </div>
-          </div>
-          {/* Left showcase / brand */}
-          <div className="flex flex-col justify-center gap-8">
-           
-            <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 mt-4">
-              {FEATURES.slice(0,4).map((f) => (
-                <div key={f.title} className="flex gap-3 items-start bg-white/6 backdrop-blur-sm rounded-xl p-3 border border-white/6">
-                  <f.Icon size={18} strokeWidth={1.6} className="text-[var(--accent)] mt-1" />
-                  <div>
-                    <div className="text-sm font-semibold text-white">{f.title}</div>
-                    <div className="text-xs text-white/60">{f.desc}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* <div className="mt-6 flex gap-4">
-             // <Link href="/pricing" className="inline-flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-lg shadow hover:shadow-lg">Explore templates</Link>
-             // <Link href="/" className="inline-flex items-center gap-2 border border-white/10 text-white/90 px-4 py-2 rounded-lg">Learn more</Link>
-           // </div> */}
-
-            <div className="hidden sm:block mt-6">
-              <img src="/assets/login-illustration.svg" alt="" className="w-full max-w-md opacity-95" />
             </div>
           </div>
 
@@ -204,7 +207,7 @@ export default function LoginPage() {
       <div className="fixed top-6 left-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition rounded-full px-3 py-2 hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          className="inline-flex items-center gap-1.5 text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors rounded-full px-3 py-2 hover:bg-[var(--bg-subtle)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
           <ArrowLeft size={15} />
           Back to home
