@@ -4,6 +4,8 @@ import { TEMPLATES } from './templates';
 import { AnyData } from './sections';
 import { buildPrintHtml, PrintOptions } from './print-html';
 
+// src/lib/resume-canvas/pdf-export.ts
+
 const FONT_CSS: Record<string, { css: string; gUrl: string | null }> = {
   inter: { css: "'Inter',Arial,sans-serif", gUrl: 'Inter:wght@400;500;600;700;800' },
   lato: { css: "'Lato',Arial,sans-serif", gUrl: 'Lato:wght@400;700;900' },
@@ -15,6 +17,11 @@ const FONT_CSS: Record<string, { css: string; gUrl: string | null }> = {
   playfair: { css: "'Playfair Display',Georgia,serif", gUrl: 'Playfair+Display:wght@400;600;700' },
   georgia: { css: "Georgia,'Times New Roman',serif", gUrl: null },
   jetbrains: { css: "'JetBrains Mono',monospace", gUrl: 'JetBrains+Mono:wght@400;500' },
+  // Newly added resume fonts
+  roboto: { css: "'Roboto',Arial,sans-serif", gUrl: 'Roboto:wght@400;500;700' },
+  garamond: { css: "Garamond,'Times New Roman',serif", gUrl: null },
+  montserrat: { css: "'Montserrat',Arial,sans-serif", gUrl: 'Montserrat:wght@400;500;600;700' },
+  opensans: { css: "'Open Sans',Arial,sans-serif", gUrl: 'Open+Sans:wght@400;600;700' }
 };
 
 const PDF_CSS = `

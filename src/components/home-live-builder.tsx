@@ -53,9 +53,8 @@ Jan 2023 – Present
 Responsibilities:
 
 * Developed scalable web applications used by more than 40,000 monthly users.
-* Built REST APIs using Node.js and TypeScript.
 * Improved application performance by 38% through caching and database optimisation.
-* Collaborated with designers and product teams to deliver new features.
+* Led migration to a REST API architecture, cutting integration time for new features by 30%.
 * Introduced automated testing that reduced production issues by 25%.
 
 Junior Software Developer
@@ -65,26 +64,24 @@ Jun 2020 – Dec 2022
 Responsibilities:
 
 * Developed responsive web interfaces using React and JavaScript.
-* Built backend services and database integrations.
-* Created reusable UI components for internal applications.
-* Automated repetitive development and deployment workflows.
+* Built backend services and database integrations for 3 internal tools.
+* Automated repetitive deployment workflows, cutting release time by 50%.
 
 Projects
 
 TaskFlow — Project Management Platform
 Technologies: React, Node.js, PostgreSQL
 
-* Built a project management platform for small development teams.
-* Implemented authentication, project boards, task tracking, and notifications.
-* Designed REST APIs and PostgreSQL database schemas.
-* Added responsive layouts for desktop and mobile devices.
+* Built a full-stack project management platform for small development teams.
+* Implemented authentication, task tracking, and real-time notifications.
+* Designed the REST API and PostgreSQL schema powering the platform.
 
 ShopLite — E-Commerce Application
 Technologies: Next.js, TypeScript, MongoDB
 
-* Developed a fictional e-commerce platform with product browsing and shopping cart functionality.
-* Implemented search, filtering, and user authentication.
+* Built a fictional e-commerce platform with product search, filtering, and cart.
 * Created an admin dashboard for managing products and orders.
+* Implemented secure user authentication end-to-end.
 
 Education
 
@@ -122,10 +119,8 @@ MySQL
 
 Tools:
 Git
-GitHub
 Docker
 Linux
-VS Code
 
 Cloud:
 AWS
@@ -133,60 +128,17 @@ Vercel
 
 Certifications
 
-AWS Certified Developer – Associate
-Amazon Web Services
-2024
+AWS Certified Developer – Associate | Amazon Web Services(2024)
 
-Meta Front-End Developer Certificate
-Meta
-2023
+Meta Front-End Developer Certificate-Meta (2023)
 
-JavaScript Algorithms and Data Structures
-Code Academy
-2022
-
-Languages
-
-English — Fluent
-Spanish — Intermediate
-French — Basic
 
 Achievements
 
-* Won first place in the fictional Vertex Labs Innovation Challenge.
-* Completed more than 250 programming challenges.
-* Recognised as Developer of the Quarter at Vertex Labs.
-
-Hobbies
-
-Photography
-Cycling
-Gaming
-Open-source projects
-Reading technology blogs
-
-Volunteer Experience
-
-Coding Mentor
-Community Tech Club
-2021 – 2023
-
-* Mentored beginners learning web development.
-* Conducted introductory JavaScript workshops.
-* Helped students build their first web applications.
-
-Awards
-
-Developer of the Quarter — Vertex Labs — 2024
-
-Leadership
-
-Technical Lead — Developer Community
-2023 – Present
-
-* Coordinated a small team of developers.
-* Organised monthly technical workshops.
-* Reviewed projects and helped members improve their development practices.
+* Recognised as Developer of the Quarter at Vertex Labs for reliability and mentorship.
+* Won first place in the Vertex Labs Innovation Challenge.
+* Led a 4-person developer community as Technical Lead, running monthly workshops.
+* Mentored 6+ junior developers through a local coding-mentor programme.
 `;
 
 const GEN_MESSAGES = [
@@ -683,12 +635,7 @@ export default function HomeLiveBuilder() {
                 >
                   <Sparkles size={15} /> Generate resume with AI
                 </button>
-                <button
-                  onClick={() => setMobilePanelOpen(true)}
-                  className="lg:hidden mt-3 block mx-auto text-xs font-semibold text-[var(--fg-muted)] underline underline-offset-2"
-                >
-                  Use my own career data instead
-                </button>
+                
               </div>
             )}
             {generating && (

@@ -88,6 +88,11 @@ export default function BuilderClient({
   const router = useRouter();
   const canvasRef = useRef<HTMLDivElement>(null);
   const canvasOuterRef = useRef<HTMLDivElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const savedRangeRef = useRef<Range | null>(null);
+  const fontSizeSpanRef = useRef<HTMLSpanElement | null>(null);
+  const [selToolbar, setSelToolbar] = useState<{ x: number; y: number } | null>(null);
+  const [fontSizeVal, setFontSizeVal] = useState(14);
   const [paperZoom, setPaperZoom] = useState(1);
 
   useEffect(() => {
@@ -102,6 +107,156 @@ export default function BuilderClient({
     window.addEventListener('resize', computeZoom);
     return () => window.removeEventListener('resize', computeZoom);
   }, []);
+
+  // Floating text-format toolbar: shows after a text selection is made inside
+  // the resume canvas, hides on outside click. Selection is saved to a ref
+  // (not state) since Range objects are mutable/live and shouldn't be part
+  // of React state.
+  useEffect(() => {
+    function showToolbarFromSelection() {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+      const range = sel.getRangeAt(0);
+      const container = canvasRef.current;
+      if (!container || !container.contains(range.commonAncestorContainer)) return;
+      const node = range.commonAncestorContainer;
+      const el = node.nodeType === 1 ? (node as HTMLElement) : node.parentElement;
+      const editableEl = el?.closest('[contenteditable="true"], [data-edit-field]');
+      if (!editableEl) return;
+      const rect = range.getBoundingClientRect();
+      if (!rect || (rect.width === 0 && rect.height === 0)) return;
+      savedRangeRef.current = range.cloneRange();
+      fontSizeSpanRef.current = null;
+      setSelToolbar({ x: rect.left + rect.width / 2, y: rect.top });
+    }
+    function onMouseUp(e: MouseEvent) {
+      if (toolbarRef.current?.contains(e.target as Node)) return;
+      setTimeout(showToolbarFromSelection, 0);
+    }
+    function onKeyUp(e: KeyboardEvent) {
+      if (e.shiftKey || e.key === 'Shift' || e.key.startsWith('Arrow')) setTimeout(showToolbarFromSelection, 0);
+    }
+    function onMouseDown(e: MouseEvent) {
+      if (toolbarRef.current?.contains(e.target as Node)) return;
+      fontSizeSpanRef.current = null;
+      setSelToolbar(null);
+    }
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        fontSizeSpanRef.current = null;
+        setSelToolbar(null);
+      }
+    }
+    const c = canvasRef.current;
+    c?.addEventListener('mouseup', onMouseUp);
+    c?.addEventListener('keyup', onKeyUp);
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      c?.removeEventListener('mouseup', onMouseUp);
+      c?.removeEventListener('keyup', onKeyUp);
+      document.removeEventListener('mousedown', onMouseDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, []);
+
+  /** Re-selects the saved range so a toolbar click (which steals focus) still formats the right text. */
+  function restoreSelection(): Range | null {
+    const r = savedRangeRef.current;
+    if (!r) return null;
+    const sel = window.getSelection();
+    sel?.removeAllRanges();
+    sel?.addRange(r);
+    return r;
+  }
+
+  /** Notifies autosave that editable content changed, then closes the toolbar. Deliberately does NOT
+   *  dispatch a synthetic 'input' event — if the app's own input listener re-syncs DOM from a plain-text
+   *  data model on every input, that would immediately strip the formatting tag we just inserted. */
+  function afterFormat(_range: Range) {
+    scheduleAutoSave?.();
+    setSelToolbar(null);
+    window.getSelection()?.removeAllRanges();
+  }
+
+  /** Wraps the current selection in an element built by makeEl (e.g. a styled <span>). Operates on the
+   *  saved Range directly, so it works even if clicking the toolbar moved browser focus/selection away. */
+  function wrapSelection(makeEl: () => HTMLElement) {
+    const range = restoreSelection();
+    if (!range) return;
+    const el = makeEl();
+    try {
+      el.appendChild(range.extractContents());
+      range.insertNode(el);
+    } catch {
+      return;
+    }
+    afterFormat(range);
+  }
+
+  function toggleBold() {
+    wrapSelection(() => document.createElement('b'));
+  }
+
+  function applyHighlight(color: string) {
+    wrapSelection(() => {
+      const mark = document.createElement('mark');
+      mark.style.background = color;
+      mark.style.color = 'inherit';
+      mark.style.padding = '0 1px';
+      mark.style.borderRadius = '2px';
+      return mark;
+    });
+  }
+
+  /** Font-size slider: wraps the selection once on the first drag tick, then just restyles that
+   *  same span on every subsequent tick — so dragging doesn't re-wrap/nest a new span per pixel. */
+  function handleFontSizeSlider(px: number) {
+    setFontSizeVal(px);
+    if (fontSizeSpanRef.current && fontSizeSpanRef.current.isConnected) {
+      fontSizeSpanRef.current.style.fontSize = `${px}px`;
+      scheduleAutoSave?.();
+      return;
+    }
+    const range = restoreSelection();
+    if (!range) return;
+    const span = document.createElement('span');
+    span.style.fontSize = `${px}px`;
+    try {
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+    } catch {
+      return;
+    }
+    fontSizeSpanRef.current = span;
+    const newRange = document.createRange();
+    newRange.selectNodeContents(span);
+    savedRangeRef.current = newRange;
+    window.getSelection()?.removeAllRanges();
+    window.getSelection()?.addRange(newRange);
+    scheduleAutoSave?.();
+  }
+
+  function applyFontFamily(css: string) {
+    wrapSelection(() => {
+      const span = document.createElement('span');
+      span.style.fontFamily = css;
+      return span;
+    });
+  }
+
+  function clearSelectionFormatting() {
+    const range = restoreSelection();
+    if (!range) return;
+    const text = range.toString();
+    try {
+      range.deleteContents();
+      range.insertNode(document.createTextNode(text));
+    } catch {
+      return;
+    }
+    afterFormat(range);
+  }
 
   const [tab, setTab] = useState<'generate' | 'elements' | 'style'>(initialData ? 'style' : 'generate');
   const [rawData, setRawData] = useState(initialRaw);
@@ -159,6 +314,25 @@ export default function BuilderClient({
   const [photoOn, setPhotoOn] = useState(false);
   const [fontId, setFontId] = useState((initialData?.layout_config?.font_id as string) || 'inter');
   const [fontScaleVal, setFontScaleVal] = useState((initialData?.layout_config?.font_scale as number) || 1);
+  const [lineSpacing, setLineSpacingVal] = useState((initialData?.layout_config?.line_spacing as number) || 1);
+  const [sectionSpacing, setSectionSpacingVal] = useState((initialData?.layout_config?.section_spacing as number) || 1);
+
+  const applyLineSpacing = useCallback((val: number) => {
+    setLineSpacingVal(val);
+    const w = window as any;
+    if (w.currentData) {
+      w.currentData.layout_config = { ...(w.currentData.layout_config || {}), line_spacing: val };
+    }
+    scheduleAutoSave?.();
+  }, []);
+  const applySectionSpacing = useCallback((val: number) => {
+    setSectionSpacingVal(val);
+    const w = window as any;
+    if (w.currentData) {
+      w.currentData.layout_config = { ...(w.currentData.layout_config || {}), section_spacing: val };
+    }
+    scheduleAutoSave?.();
+  }, []);
 
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
@@ -675,6 +849,96 @@ export default function BuilderClient({
                 </div>
               </div>
 
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs font-semibold text-[var(--fg-muted)] uppercase tracking-wide">Line spacing</div>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      min={50}
+                      max={160}
+                      step={1}
+                      value={Math.round(lineSpacing * 100)}
+                      onChange={(e) => {
+                        const raw = Number(e.target.value);
+                        if (Number.isNaN(raw)) return;
+                        const pct = Math.min(160, Math.max(50, raw));
+                        applyLineSpacing(pct / 100);
+                      }}
+                      className="w-14 rounded-md border border-[var(--border)] px-1.5 py-1 text-xs text-right focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                    />
+                    <span className="text-xs text-[var(--fg-muted)]">%</span>
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min={0.50}
+                  max={1.6}
+                  step={0.01}
+                  value={lineSpacing}
+                  onChange={(e) => applyLineSpacing(Number(e.target.value))}
+                  className="w-full accent-[var(--accent)]"
+                />
+                <div className="flex gap-1.5 mt-2">
+                  {[0.9, 1, 1.15, 1.3].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => applyLineSpacing(s)}
+                      className={`flex-1 text-xs rounded-lg border py-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)] ${
+                        lineSpacing === s ? 'border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]' : 'border-[var(--border)] hover:bg-[var(--bg-subtle)]'
+                      }`}
+                    >
+                      {Math.round(s * 100)}%
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs font-semibold text-[var(--fg-muted)] uppercase tracking-wide">Section spacing</div>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      min={0}
+                      max={200}
+                      step={1}
+                      value={Math.round(sectionSpacing * 100)}
+                      onChange={(e) => {
+                        const raw = Number(e.target.value);
+                        if (Number.isNaN(raw)) return;
+                        const pct = Math.min(200, Math.max(0, raw));
+                        applySectionSpacing(pct / 100);
+                      }}
+                      className="w-14 rounded-md border border-[var(--border)] px-1.5 py-1 text-xs text-right focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                    />
+                    <span className="text-xs text-[var(--fg-muted)]">%</span>
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min={0.00}
+                  max={2}
+                  step={0.01}
+                  value={sectionSpacing}
+                  onChange={(e) => applySectionSpacing(Number(e.target.value))}
+                  className="w-full accent-[var(--accent)]"
+                />
+                <div className="flex gap-1.5 mt-2">
+                  {[0.6, 0.8, 1, 1.3].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => applySectionSpacing(s)}
+                      className={`flex-1 text-xs rounded-lg border py-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)] ${
+                        sectionSpacing === s ? 'border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]' : 'border-[var(--border)] hover:bg-[var(--bg-subtle)]'
+                      }`}
+                    >
+                      {Math.round(s * 100)}%
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
                 <input id="photo-toggle" type="checkbox" checked={photoOn} onChange={(e) => togglePhoto(e.target.checked)} className="accent-[var(--accent)]" />
                 Show photo
@@ -710,7 +974,15 @@ export default function BuilderClient({
           )}
           <div
             className="builder-paper bg-white text-black rounded-sm w-[210mm] min-h-[297mm] p-[15mm] relative shrink-0"
-            style={{ fontFamily: FONTS.find((f) => f.id === fontId)?.css, zoom: paperZoom }}
+            style={
+              {
+                fontFamily: FONTS.find((f) => f.id === fontId)?.css,
+                zoom: paperZoom,
+                '--rs-font': fontScaleVal,
+                '--rs-line': lineSpacing,
+                '--rs-gap': sectionSpacing,
+              } as any
+            }
           >
             {!hasResume && !generating && (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8 z-10">
@@ -724,6 +996,102 @@ export default function BuilderClient({
             )}
             <div id="rp-content" ref={canvasRef} />
           </div>
+
+          {selToolbar && (
+            <div
+              ref={toolbarRef}
+              style={{ position: 'fixed', left: selToolbar.x, top: Math.max(8, selToolbar.y - 46), transform: 'translateX(-50%)', zIndex: 60 }}
+              className="flex items-center gap-1 rounded-xl border border-[var(--border)] bg-[var(--bg)] shadow-xl px-1.5 py-1"
+            >
+              <button
+                onClick={toggleBold}
+                title="Bold"
+                className="w-7 h-7 rounded-md hover:bg-[var(--bg-subtle)] text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
+              >
+                B
+              </button>
+
+              <div className="relative group pb-1 -mb-1">
+                <button
+                  title="Highlight"
+                  className="w-7 h-7 rounded-md hover:bg-[var(--bg-subtle)] text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
+                >
+                  🖍
+                </button>
+                <div className="hidden group-hover:flex absolute top-full left-1/2 -translate-x-1/2 pt-1 gap-1">
+                  <div className="flex gap-1 bg-[var(--bg)] border border-[var(--border)] rounded-lg p-1.5 shadow-lg">
+                    {['#fde68a', '#bbf7d0', '#bfdbfe', '#fecaca', '#e9d5ff'].map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => applyHighlight(c)}
+                        style={{ background: c }}
+                        title="Apply highlight"
+                        className="w-5 h-5 rounded-full border border-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-px h-5 bg-[var(--border)] mx-0.5" />
+
+              <div className="relative group pb-1 -mb-1">
+                <button
+                  title="Text size"
+                  className="h-7 min-w-[2.25rem] px-1.5 rounded-md hover:bg-[var(--bg-subtle)] text-[11px] font-semibold tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
+                >
+                  {fontSizeVal}px
+                </button>
+                <div className="hidden group-hover:flex absolute top-full left-1/2 -translate-x-1/2 pt-1">
+                  <div className="flex items-center gap-2 bg-[var(--bg)] border border-[var(--border)] rounded-lg p-2 shadow-lg w-44">
+                    <input
+                      type="range"
+                      min={0}
+                      max={60}
+                      step={1}
+                      value={fontSizeVal}
+                      onChange={(e) => handleFontSizeSlider(Number(e.target.value))}
+                      className="w-full accent-[var(--accent)]"
+                    />
+                    <span className="text-xs text-[var(--fg-muted)] w-8 text-right shrink-0 tabular-nums">{fontSizeVal}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative group pb-1 -mb-1">
+                <button
+                  title="Font"
+                  className="w-7 h-7 rounded-md hover:bg-[var(--bg-subtle)] text-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
+                >
+                  Fᵃ
+                </button>
+                <div className="hidden group-hover:flex absolute top-full right-0 pt-1">
+                  <div className="flex flex-col gap-0.5 bg-[var(--bg)] border border-[var(--border)] rounded-lg p-1 shadow-lg max-h-56 overflow-auto min-w-[130px]">
+                    {FONTS.map((f) => (
+                      <button
+                        key={f.id}
+                        onClick={() => applyFontFamily(f.css)}
+                        style={{ fontFamily: f.css }}
+                        className="text-xs px-2.5 py-1 rounded-md hover:bg-[var(--bg-subtle)] text-left whitespace-nowrap focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
+                      >
+                        {f.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-px h-5 bg-[var(--border)] mx-0.5" />
+
+              <button
+                onClick={clearSelectionFormatting}
+                title="Clear formatting"
+                className="px-2 h-7 rounded-md hover:bg-[var(--bg-subtle)] text-xs text-[var(--fg-muted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
+              >
+                Clear
+              </button>
+            </div>
+          )}
 
           {/* Template gallery drawer */}
           {tplPanelOpen && hasResume && (

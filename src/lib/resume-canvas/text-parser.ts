@@ -809,34 +809,78 @@ function parseEntryLines(
   );
 }
 
+/** A certification date is almost always a single year or "Month Year" — not a
+ *  range like Experience/Education use — so parseDateRange (which requires two
+ *  parts joined by a dash/"to") never matches it. Without this, a bare "2024"
+ *  line falls through and becomes its own fake entry instead of being read as a date. */
+function looksLikeBareDate(line: string): boolean {
+  const text = line.trim();
+  return (
+    /^(?:(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+)?(?:19|20)\d{2}$/i.test(
+      text
+    ) || /^(?:present|current|now)$/i.test(text)
+  );
+}
+
+/**
+ * Certifications are usually written as up to 3 consecutive lines per entry —
+ * name, issuer, date — with a blank line between entries, e.g.:
+ *   AWS Certified Developer – Associate
+ *   Amazon Web Services
+ *   2024
+ * Earlier this treated every non-blank line as its own separate entry (no
+ * grouping at all), so a single certification rendered as 3 fake entries.
+ * This groups lines the same way a blank-line-separated block should: first
+ * line is the title, second is the issuer, a date-looking line is the date,
+ * and a blank line (or a fresh title once the entry already has a date)
+ * starts the next entry.
+ */
 function parseCertificationEntries(lines: string[]): ParsedEntry[] {
-  return lines
-    .map(stripBullet)
-    .filter(Boolean)
-    .map((line) => {
-      const date = parseDateRange(line);
+  const entries: ParsedEntry[] = [];
+  let current: ParsedEntry | null = null;
 
-      if (date) {
-        return {
-          id: uid('e'),
-          title: line,
-          subtitle: '',
-          date_start: date.start,
-          date_end: date.end,
-          bullets: [],
-        };
-      }
+  const finish = () => {
+    if (current && (current.title || current.subtitle || current.date_start)) {
+      entries.push(current);
+    }
+    current = null;
+  };
 
-      const parts = line.split(/\s+[·|]\s+/);
-      return {
-        id: uid('e'),
-        title: parts[0].trim(),
-        subtitle: parts.slice(1).join(' · ').trim(),
-        date_start: '',
-        date_end: '',
-        bullets: [],
-      };
-    });
+  for (const raw of lines) {
+    const line = stripBullet(raw).trim();
+
+    if (!line) {
+      // Blank line = explicit separator between certifications.
+      finish();
+      continue;
+    }
+
+    const range = parseDateRange(line);
+    if (range || looksLikeBareDate(line)) {
+      if (!current) current = { id: uid('e'), title: '', subtitle: '', date_start: '', date_end: '', bullets: [] };
+      current.date_start = range ? range.start : line;
+      current.date_end = range ? range.end : '';
+      continue;
+    }
+
+    if (current && current.date_start) {
+      // This entry already has its date — a new non-date line starts the next one.
+      finish();
+    }
+
+    if (!current) {
+      current = { id: uid('e'), title: line, subtitle: '', date_start: '', date_end: '', bullets: [] };
+    } else if (!current.title) {
+      current.title = line;
+    } else if (!current.subtitle) {
+      current.subtitle = line;
+    } else {
+      current.subtitle = `${current.subtitle} · ${line}`;
+    }
+  }
+
+  finish();
+  return entries;
 }
 
 function parseAchievementEntries(lines: string[]): ParsedEntry[] {

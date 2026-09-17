@@ -10,8 +10,8 @@ import { getCurrentUserId } from '@/lib/session';
 const FEATURES = [
   {
     Icon: Sparkles,
-    title: 'AI Resume Generation',
-    desc: 'Paste your raw career history and a target role — Gemini writes a fully structured, ATS-optimised resume in seconds, tailored to the job description.',
+    title: 'Free AI Resume Builder',
+    desc: 'Paste your raw career history and a target role — AI writes a fully structured, ATS-optimised resume in seconds. Free to start, no experience required.',
   },
   {
     Icon: MessageSquareText,
@@ -25,13 +25,13 @@ const FEATURES = [
   },
   {
     Icon: LayoutTemplate,
-    title: '30 Professional Templates',
-    desc: 'From minimalist to bold, academic to creative — fully editable, drag-and-drop sections, skill bars, dots, tags, and tables.',
+    title: '30 Free Resume Templates',
+    desc: 'From minimalist to bold, academic to creative — fully editable, drag-and-drop sections, skill bars, dots, tags, and tables. Or skip AI entirely and build manually.',
   },
   {
     Icon: ShieldCheck,
-    title: 'Built for ATS',
-    desc: 'Real, selectable text — not a screenshot. Every template is checked against how ATS systems actually parse resumes.',
+    title: 'Free ATS Resume Score Checker',
+    desc: 'Every resume gets a free, instant ATS score. Real, selectable text — not a screenshot — checked against how ATS systems actually parse resumes.',
   },
   {
     Icon: History,
@@ -41,10 +41,10 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  { n: '01', title: 'Paste your career data', desc: 'Education, experience, projects, skills — in your own words, no rigid form.' },
-  { n: '02', title: 'AI builds your resume', desc: 'Gemini structures it into a polished, ATS-ready resume tailored to your target role.' },
+  { n: '01', title: 'Paste your career data', desc: 'Education, experience, projects, skills — in your own words, no rigid form. First resume? No experience needed to start.' },
+  { n: '02', title: 'AI builds your resume — or you build it manually', desc: 'AI structures it into a polished, free, ATS-ready resume tailored to your target role — or switch to manual mode and write it yourself.' },
   { n: '03', title: 'Edit by chatting', desc: "Refine anything by typing what you want changed — or click directly on the page." },
-  { n: '04', title: 'Export & apply', desc: 'Download a real, selectable-text PDF that passes ATS parsing, ready to send.' },
+  { n: '04', title: 'Check your free ATS score & export', desc: 'See your free ATS resume score, then download a real, selectable-text PDF that passes ATS parsing, ready to send.' },
 ];
 
 const ANALYSIS_ITEMS = [
@@ -53,12 +53,37 @@ const ANALYSIS_ITEMS = [
   { icon: TrendingUp, color: 'text-blue-500', label: 'Score boost tips', items: ['Add numbers & percentages', 'Use power words', 'Tailor to job desc', 'Improve spacing'] },
 ];
 
+const SITE_URL = 'https://quantumcv.app';
+
+/** SoftwareApplication JSON-LD, scoped to the homepage since it's describing the
+ *  product itself (eligible for rich results like price/category in search). No
+ *  ratings/review data included since there's no real aggregate to report yet —
+ *  inventing one would violate Google's structured-data guidelines and risk a
+ *  manual action. Add `aggregateRating` here once real review data exists. */
+function softwareAppJsonLd() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'QuantumCV',
+    url: SITE_URL,
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    description:
+      'Free AI resume builder and free ATS resume score checker for freshers and students. Build with AI or manually, then check your ATS score instantly.',
+  };
+}
+
 export default async function HomePage() {
   const userId = await getCurrentUserId();
   const ctaHref = userId ? '/dashboard' : '/login';
   const ctaLabel = userId ? 'Go to dashboard' : 'Start building free';
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppJsonLd()) }}
+      />
       <Nav />
 
       {/* Hero Section */}
@@ -71,12 +96,12 @@ export default async function HomePage() {
         </ScrollReveal>
         <ScrollReveal delay={0.1}>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6">
-            Build a resume from your <span className="text-[var(--accent)]">raw career data</span>
+            <span className="text-[var(--accent)]">Free AI Resume Builder</span> made for freshers
           </h1>
         </ScrollReveal>
         <ScrollReveal delay={0.2}>
           <p className="text-base sm:text-lg text-[var(--fg-muted)] mb-8 leading-relaxed max-w-2xl mx-auto">
-            AI-powered resume generation, live chat-based editing, and 30 ATS-optimised templates — all in one place. No forms. No fighting with Word.
+            Build your resume with AI — or manually, section by section. Get a free ATS resume score instantly, so freshers and students know exactly where they stand before applying. No forms. No fighting with Word.
           </p>
         </ScrollReveal>
         <ScrollReveal delay={0.3}>
@@ -99,15 +124,15 @@ export default async function HomePage() {
           <div className="flex flex-row flex-wrap gap-8 text-sm justify-center">
             <div>
               <div className="font-bold text-[var(--accent)] text-lg">30+</div>
-              <p className="text-[var(--fg-muted)]">Professional templates</p>
+              <p className="text-[var(--fg-muted)]">Free resume templates</p>
             </div>
             <div>
               <div className="font-bold text-[var(--accent)] text-lg">100%</div>
-              <p className="text-[var(--fg-muted)]">ATS compatible</p>
+              <p className="text-[var(--fg-muted)]">Free ATS score check</p>
             </div>
             <div>
               <div className="font-bold text-[var(--accent)] text-lg">&lt;2min</div>
-              <p className="text-[var(--fg-muted)]">First resume</p>
+              <p className="text-[var(--fg-muted)]">First resume, no experience needed</p>
             </div>
           </div>
         </ScrollReveal>
@@ -115,8 +140,21 @@ export default async function HomePage() {
 
       {/* Live Preview — full-width, below the hero copy, on every device */}
       <section className="max-w-[1400px] mx-auto px-5 pb-20 sm:pb-28">
+        <ScrollReveal>
+          <h2 className="text-center text-2xl sm:text-3xl font-extrabold tracking-tight mb-8">See Demo</h2>
+        </ScrollReveal>
         <ScrollReveal delay={0.2}>
           <HomeLiveBuilder />
+        </ScrollReveal>
+        <ScrollReveal delay={0.3}>
+          <div className="flex justify-center mt-10">
+            <Link
+              href={ctaHref}
+              className="rounded-lg bg-[var(--accent)] text-white font-semibold px-6 py-3.5 text-sm hover:bg-[var(--accent-hover)] transition-colors flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+            >
+              Build your own resume <ArrowRight size={16} />
+            </Link>
+          </div>
         </ScrollReveal>
       </section>
 
@@ -125,8 +163,8 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto px-5">
           <ScrollReveal>
             <div className="text-center mb-14">
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">Everything you need, nothing you don't</h2>
-              <p className="text-[var(--fg-muted)] max-w-lg mx-auto">A complete AI resume workflow — from raw career data to a polished, downloadable PDF.</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">Everything a fresher needs, free to start</h2>
+              <p className="text-[var(--fg-muted)] max-w-lg mx-auto">A complete free AI resume builder workflow — from raw career data to a polished, downloadable, ATS-ready PDF.</p>
             </div>
           </ScrollReveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -151,10 +189,10 @@ export default async function HomePage() {
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-4 py-1.5 text-xs font-semibold text-[var(--fg-muted)] mb-4">
               <Zap size={13} className="text-[var(--accent)]" />
-              Smart Analysis
+              Free ATS Resume Score Checker
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">Know exactly what employers see</h2>
-            <p className="text-[var(--fg-muted)] max-w-lg mx-auto">Our analyzer gives you real-time feedback on what makes your resume stand out — and what needs fixing.</p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">Know exactly what employers see — for free</h2>
+            <p className="text-[var(--fg-muted)] max-w-lg mx-auto">Our free resume analyser gives freshers and students real-time feedback on what makes a resume stand out — and what needs fixing, before you apply.</p>
           </div>
         </ScrollReveal>
 
@@ -188,13 +226,13 @@ export default async function HomePage() {
           <div className="mt-12 p-8 rounded-2xl border border-[var(--border)] bg-gradient-to-r from-[var(--accent)]/5 to-transparent">
             <div className="grid sm:grid-cols-2 gap-8 items-center">
               <div>
-                <h3 className="text-xl sm:text-2xl font-extrabold mb-3">Get actionable insights instantly</h3>
-                <p className="text-[var(--fg-muted)] mb-6 leading-relaxed">Every suggestion is backed by real ATS data. See exactly which keywords matter, how to structure your achievements, and what format parsers love.</p>
+                <h3 className="text-xl sm:text-2xl font-extrabold mb-3">Get your free ATS resume score instantly</h3>
+                <p className="text-[var(--fg-muted)] mb-6 leading-relaxed">Every suggestion is backed by real ATS data. See exactly which keywords matter, how to structure your achievements, and what format parsers love — completely free.</p>
                 <Link
                   href={ctaHref}
                   className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] text-white font-semibold px-6 py-3 text-sm hover:bg-[var(--accent-hover)] transition-colors"
                 >
-                  Try the analyzer <ArrowRight size={16} />
+                  Try the free analyzer <ArrowRight size={16} />
                 </Link>
               </div>
               <div className="bg-white text-black rounded-lg p-6 border border-[var(--border)]">
@@ -231,8 +269,8 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto px-5">
           <ScrollReveal>
             <div className="text-center mb-14">
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">How it works</h2>
-              <p className="text-[var(--fg-muted)]">Four steps from blank page to a resume you're proud to send.</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">How the free AI resume builder works</h2>
+              <p className="text-[var(--fg-muted)]">Four steps from blank page to a resume you're proud to send — no experience required.</p>
             </div>
           </ScrollReveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -252,8 +290,8 @@ export default async function HomePage() {
       <section id="pricing" className="max-w-6xl mx-auto px-5 py-20 sm:py-28">
         <ScrollReveal>
           <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">Simple, pay-as-you-go pricing</h2>
-            <p className="text-[var(--fg-muted)]">No subscriptions. Buy credits once, use them whenever you need them.</p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">Free to start, pay only if you need more</h2>
+            <p className="text-[var(--fg-muted)]">Free credits included for every fresher. No subscriptions — buy more only when you need them.</p>
           </div>
         </ScrollReveal>
         <ScrollReveal delay={0.1}>
@@ -264,8 +302,8 @@ export default async function HomePage() {
       <section className="max-w-4xl mx-auto px-5 py-20 sm:py-28">
         <ScrollReveal>
           <div className="rounded-3xl bg-gradient-to-r from-[var(--accent)] to-blue-600 text-white px-8 py-16 sm:py-20 shadow-2xl">
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4 text-center">Ready to build your resume?</h2>
-            <p className="text-white/80 mb-8 max-w-md mx-auto text-center">Get your first resume generated in under two minutes — free credits included.</p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4 text-center">Ready to build your free resume?</h2>
+            <p className="text-white/80 mb-8 max-w-md mx-auto text-center">Get your first resume generated free in under two minutes — built for freshers, no experience needed.</p>
             <div className="flex justify-center">
               <Link
                 href={ctaHref}

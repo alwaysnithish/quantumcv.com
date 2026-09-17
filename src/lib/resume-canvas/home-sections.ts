@@ -141,8 +141,10 @@ export function entryHtml(en: AnyData, ac: string, secId: string, compact = fals
         >${esc(dateStr)}</div>
       </div>
     </div>
-    <div style="margin-top:calc(6px * var(--rs-gap, 1))">
-      ${(en.bullets || [])
+    ${
+      en.bullets && en.bullets.length
+        ? `<div style="margin-top:calc(6px * var(--rs-gap, 1))">
+      ${en.bullets
         .map(
           (b: string, bi: number) => `
         <div class="resume-bullet" style="position:relative;display:flex;align-items:flex-start;
@@ -160,8 +162,10 @@ export function entryHtml(en: AnyData, ac: string, secId: string, compact = fals
         </div>`
         )
         .join('')}
-    </div>
-    <div contenteditable="false" style="margin-top:calc(3px * var(--rs-gap, 1))">
+    </div>`
+        : ''
+    }
+    <div contenteditable="false" style="margin-top:calc(${en.bullets && en.bullets.length ? 3 : 4}px * var(--rs-gap, 1))">
       <button onclick="typeof addBullet!=='undefined'&&addBullet('${secId}','${en.id}')"
         class="add-item-btn" style="font-size:0.68rem;padding:2px 6px;width:auto;display:inline-block">+ bullet</button>
     </div>
@@ -391,6 +395,59 @@ export function dividerHtml(style: string, ac: string): string {
   return `<div style="${styles[style] || styles.solid}"></div>`;
 }
 
+/** Compact single-line credential/accomplishment row — for entries that read as a fact
+ *  ("AWS Certified Developer — Amazon Web Services · 2024"), not a job with responsibilities.
+ *  Deliberately reuses entryHtml's exact title-row DOM shape (same field nesting, same
+ *  data-edit-field placement) rather than inventing new markup, so it stays editable through
+ *  whatever mechanism makes entryHtml's fields editable. bulletDot is placed in the same
+ *  align-items:flex-start context it's already tuned for elsewhere (entryHtml/bulletListHtml) —
+ *  it was previously dropped into a baseline-aligned row, which double-offset it. */
+function compactEntryHtml(en: AnyData, ac: string, secId: string): string {
+  const dateStr = [en.date_start, en.date_end].filter(Boolean).join(' – ');
+  const bullets = en.bullets || [];
+  return `<div class="resume-entry" data-entry-id="${en.id}" style="display:flex;align-items:flex-start;gap:6px;
+      margin-bottom:calc(4px * var(--rs-gap, 1))">
+    ${bulletDot(ac)}<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;flex:1;min-width:0">
+      <div style="font-size:calc(0.78rem * var(--rs-font, 1));font-weight:700;color:#0f172a;word-break:break-word;flex:1;min-width:0"
+      ><span data-edit-field="title" style="border-radius:2px;cursor:text">${escRich(en.title)}</span>${
+        en.subtitle
+          ? ` <span style="font-weight:600;color:${ac}">— <span data-edit-field="subtitle" style="border-radius:2px;cursor:text">${escRich(
+              en.subtitle
+            )}</span></span>`
+          : ''
+      }</div>
+      ${
+        dateStr
+          ? `<div data-edit-field="date"
+          style="font-weight:400;font-size:calc(0.67rem * var(--rs-font, 1));color:#64748b;font-family:monospace;flex-shrink:0;white-space:nowrap;border-radius:2px;cursor:text"
+        >${esc(dateStr)}</div>`
+          : ''
+      }
+    </div>
+  </div>${
+    bullets.length
+      ? `<div style="margin:0 0 calc(4px * var(--rs-gap, 1)) 16px">
+      ${bullets
+        .map(
+          (b: string, bi: number) => `
+        <div style="font-size:calc(0.74rem * var(--rs-font, 1));color:#64748b;line-height:calc(1.3 * var(--rs-line, 1))">
+          <span data-edit-field="bullet" data-bullet-index="${bi}" style="border-radius:2px;cursor:text">${escRich(b)}</span>
+        </div>`
+        )
+        .join('')}
+    </div>`
+      : ''
+  }`;
+}
+
+function compactListHtml(sec: AnyData, ac: string): string {
+  return `<div contenteditable="true" spellcheck="false"
+      oninput="typeof handleSectionEntryEdit!=='undefined'&&handleSectionEntryEdit('${sec.id}',this)"
+      style="outline:none">${(sec.entries || []).map((en: AnyData) => compactEntryHtml(en, ac, sec.id)).join('')}</div>
+    <div contenteditable="false"><button onclick="typeof addEntry!=='undefined'&&addEntry('${sec.id}')"
+      class="add-item-btn" style="margin-top:4px">+ Add Entry</button></div>`;
+}
+
 /** Dispatch section body rendering by type */
 export function renderSection(sec: AnyData, ac: string, compact = false): string {
   switch (sec.type) {
@@ -416,6 +473,10 @@ export function renderSection(sec: AnyData, ac: string, compact = false): string
       return tableHtml(sec, ac);
     case 'divider':
       return dividerHtml(sec.style, ac);
+    case 'certifications':
+    case 'achievements':
+    case 'awards':
+      return compactListHtml(sec, ac);
     default:
       return `<div contenteditable="true" spellcheck="false"
           oninput="typeof handleSectionEntryEdit!=='undefined'&&handleSectionEntryEdit('${sec.id}',this)"

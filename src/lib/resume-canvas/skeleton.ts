@@ -25,7 +25,7 @@ export function getSkeletonData(): AnyData {
     career_stage: 'mid',
     ai_confidence: 0,
     ats_score: 0,
-    layout_config: { accent_color: '#2563eb' },
+    layout_config: { accent_color: '#2563eb', line_spacing: 1, section_spacing: 1 },
     sections: [
       {
         id: uid(),
@@ -213,7 +213,7 @@ export const PREVIEW_DATA: AnyData = {
   github: 'github.com/alexmorgan',
   location: 'Austin, TX',
   target_role: 'Product Designer',
-  layout_config: { accent_color: '#2058e8' },
+  layout_config: { accent_color: '#2058e8', line_spacing: 1, section_spacing: 1 },
   sections: [
     {
       id: 'p-sum',

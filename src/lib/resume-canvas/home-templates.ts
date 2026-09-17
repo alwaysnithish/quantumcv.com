@@ -25,7 +25,7 @@ import {
   editableName,
   editableRole,
   AnyData,
-} from './sections';
+} from './home-sections';
 
 export interface ResumeTemplate {
   id: string;
@@ -844,10 +844,10 @@ const SET_2: Omit<ResumeTemplate, 'premium'>[] = [
       ${secs
         .map(
           (sec: AnyData) => `
-        <div data-sec-id="${sec.id}" style="margin-bottom:11px;position:relative">
+        <div data-sec-id="${sec.id}" style="margin-bottom:7px;position:relative">
           ${secCtrl(sec.id)}
           <div contenteditable="true" spellcheck="false"
-            style="font-size:0.76rem;font-weight:700;color:#0f172a;font-family:Georgia,serif;text-transform:uppercase;letter-spacing:.07em;border-bottom:1.5px solid #0f172a;padding-bottom:3px;margin:12px 0 7px;outline:none;cursor:text"
+            style="font-size:0.76rem;font-weight:700;color:#0f172a;font-family:Georgia,serif;text-transform:uppercase;letter-spacing:.07em;border-bottom:1.5px solid #0f172a;padding-bottom:3px;margin:0 0 6px;outline:none;cursor:text"
             oninput="typeof updateSecTitle!=='undefined'&&updateSecTitle('${sec.id}',this.textContent)">${esc(sec.title)}</div>
           ${secInner(sec, ac)}
         </div>`
