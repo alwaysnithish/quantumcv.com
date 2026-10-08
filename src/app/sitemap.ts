@@ -35,7 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       // so it ranks well above the legal pages.
       url: `${SITE_URL}/resumeanalyser`,
       lastModified: now,
-      changeFrequency: 'monthly',
+      changeFrequency: 'weekly',
       priority: 0.9,
     },
     // /blog and /blog/[slug] pages
