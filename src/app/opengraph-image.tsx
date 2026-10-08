@@ -3,7 +3,7 @@ import { getLogoDataUri } from '@/lib/logo';
 
 // Node runtime, not edge: the logo is read from public/ with fs.
 export const runtime = 'nodejs';
-export const alt = 'QuantumCV — build a resume from your raw career data';
+export const alt = 'QuantumCV — ATS-ready resume builder for freshers';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -57,11 +57,11 @@ export default async function OpengraphImage() {
             marginBottom: 18,
           }}
         >
-          Build a resume from your raw career data.
+          ATS-ready resume builder for freshers.
         </div>
 
         <div style={{ display: 'flex', fontSize: 22, color: 'rgba(255,255,255,0.55)' }}>
-          AI generation, chat editing, and 30 ATS-ready templates
+          Free AI resume builder, instant ATS score, 30 templates
         </div>
       </div>
     ),

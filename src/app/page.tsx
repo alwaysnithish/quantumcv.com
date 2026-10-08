@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, Sparkles, MessageSquareText, Wand2, LayoutTemplate, ShieldCheck, History, CheckCircle2, AlertCircle, TrendingUp, Zap } from 'lucide-react';
 import Nav from '@/components/nav';
@@ -6,6 +7,7 @@ import ScrollReveal from '@/components/scroll-reveal';
 import PricingCards from '@/components/pricing-cards';
 import HomeLiveBuilder from '@/components/home-live-builder';
 import { getCurrentUserId } from '@/lib/session';
+import { getAllPosts } from '@/lib/blog';
 
 const FEATURES = [
   {
@@ -55,26 +57,121 @@ const ANALYSIS_ITEMS = [
 
 const SITE_URL = 'https://quantumcv.app';
 
-/** SoftwareApplication JSON-LD, scoped to the homepage since it's describing the
- *  product itself (eligible for rich results like price/category in search). No
- *  ratings/review data included since there's no real aggregate to report yet —
- *  inventing one would violate Google's structured-data guidelines and risk a
- *  manual action. Add `aggregateRating` here once real review data exists. */
-function softwareAppJsonLd() {
+const PAGE_TITLE = 'ATS-Ready Resume Builder for Freshers — Free AI | QuantumCV';
+const PAGE_DESCRIPTION =
+  'Build an ATS-ready resume as a fresher or student. Free AI resume builder with an instant ATS score, 30 templates and chat editing. No experience needed.';
+
+/** Homepage metadata. `absolute` skips the "— QuantumCV" title template so the
+ *  title is exactly what's written above. The canonical is set here (not in the
+ *  root layout) so it only applies to the homepage. */
+export const metadata: Metadata = {
+  title: { absolute: PAGE_TITLE },
+  description: PAGE_DESCRIPTION,
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    url: SITE_URL,
+    siteName: 'QuantumCV',
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+  },
+};
+
+/** Shown on the page AND fed to FAQPage structured data. Google requires the
+ *  schema to match what visitors can actually see, so edit them here only. */
+const FAQS = [
+  {
+    q: 'Is QuantumCV really a free ATS resume builder?',
+    a: 'You can start for free. Every new account comes with free credits, and every resume you build gets a free ATS score. If you need more AI generations or edits, you can buy credit packs, which are one-time purchases rather than a subscription.',
+  },
+  {
+    q: 'What does an ATS-ready resume mean?',
+    a: 'It means the resume is built so applicant tracking software can read it: real selectable text, a simple layout and standard section headings. QuantumCV exports a PDF with selectable text, and the ATS score shows you what to fix.',
+  },
+  {
+    q: 'Can I use it with no work experience?',
+    a: 'Yes. QuantumCV is built for freshers and students. Paste your education, projects, internships, skills and activities in your own words, and the AI structures them into a resume.',
+  },
+  {
+    q: 'Do I have to use AI to build my resume?',
+    a: 'No. You can build manually, section by section, using any of the 30 templates. Or you can let the AI generate a first draft and then edit it by chatting.',
+  },
+  {
+    q: 'Which countries can I build a resume for?',
+    a: 'When you generate a resume you choose a target country: India, the United States, the United Kingdom, the UAE, Canada, Germany, Australia or Singapore.',
+  },
+  {
+    q: 'Will a high ATS score get me the job?',
+    a: 'No score can promise that. The ATS score shows how well your resume is likely to be read and how strong the content is, but employers still decide on fit. Use it as a checklist for what to improve before you apply.',
+  },
+];
+
+/** Homepage structured data as one @graph: the organisation (helps Google tell
+ *  QuantumCV apart from quantum-computing results), the website, the product
+ *  and the FAQ. No ratings/review data on purpose: there is no real aggregate
+ *  to report yet, and inventing one violates Google's structured-data rules and
+ *  risks a manual action. Add `aggregateRating` once real reviews exist. */
+function homeJsonLd() {
   return {
     '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'QuantumCV',
-    url: SITE_URL,
-    applicationCategory: 'BusinessApplication',
-    operatingSystem: 'Web',
-    description:
-      'Free AI resume builder and free ATS resume score checker for freshers and students. Build with AI or manually, then check your ATS score instantly.',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': `${SITE_URL}/#organization`,
+        name: 'QuantumCV',
+        url: SITE_URL,
+        logo: `${SITE_URL}/logo.png`,
+        sameAs: [
+          'https://x.com/quantumcv',
+          'https://linkedin.com/company/quantumcv',
+          'https://youtube.com/@quantumcv',
+        ],
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${SITE_URL}/#website`,
+        url: SITE_URL,
+        name: 'QuantumCV',
+        alternateName: ['QuantumCV AI Resume Builder', 'QuantumCV Resume Builder'],
+        publisher: { '@id': `${SITE_URL}/#organization` },
+        inLanguage: 'en',
+      },
+      {
+        '@type': 'SoftwareApplication',
+        '@id': `${SITE_URL}/#app`,
+        name: 'QuantumCV',
+        url: SITE_URL,
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        description:
+          'ATS-ready resume builder for freshers and students. Free AI resume generation, chat-based editing, 30 templates and a free ATS resume score.',
+        audience: { '@type': 'Audience', audienceType: 'Freshers and students' },
+        featureList: FEATURES.map((f) => f.title),
+        // Free to start. Check the currency matches your pricing page.
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+        publisher: { '@id': `${SITE_URL}/#organization` },
+      },
+      {
+        '@type': 'FAQPage',
+        '@id': `${SITE_URL}/#faq`,
+        mainEntity: FAQS.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
+    ],
   };
 }
 
 export default async function HomePage() {
   const userId = await getCurrentUserId();
+  const guides = getAllPosts().slice(0, 3);
   const ctaHref = userId ? '/dashboard' : '/login';
   const ctaLabel = userId ? 'Go to dashboard' : 'Start building free';
   return (
@@ -82,7 +179,7 @@ export default async function HomePage() {
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppJsonLd()) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd()).replace(/</g, '\\u003c') }}
       />
       <Nav />
 
@@ -91,17 +188,17 @@ export default async function HomePage() {
         <ScrollReveal>
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-4 py-1.5 text-xs font-semibold text-[var(--fg-muted)] mb-6">
             <Sparkles size={13} className="text-[var(--accent)]" />
-            Powered by Gemini AI
+            Free AI resume builder, powered by Gemini
           </div>
         </ScrollReveal>
         <ScrollReveal delay={0.1}>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6">
-            <span className="text-[var(--accent)]">Free AI Resume Builder</span> made for freshers
+            <span className="text-[var(--accent)]">ATS-Ready Resume Builder</span> for freshers
           </h1>
         </ScrollReveal>
         <ScrollReveal delay={0.2}>
           <p className="text-base sm:text-lg text-[var(--fg-muted)] mb-8 leading-relaxed max-w-2xl mx-auto">
-            Build your resume with AI — or manually, section by section. Get a free ATS resume score instantly, so freshers and students know exactly where they stand before applying. No forms. No fighting with Word.
+            Build an ATS-ready resume with free AI — or manually, section by section. Get an instant ATS score so freshers and students know exactly where they stand before applying. No forms. No fighting with Word.
           </p>
         </ScrollReveal>
         <ScrollReveal delay={0.3}>
@@ -297,6 +394,57 @@ export default async function HomePage() {
         <ScrollReveal delay={0.1}>
           <PricingCards />
         </ScrollReveal>
+      </section>
+
+      {/* Resume guides: internal links to the blog */}
+      {guides.length > 0 && (
+        <section id="guides" className="bg-[var(--bg-subtle)] py-20 sm:py-28">
+          <div className="max-w-6xl mx-auto px-5">
+            <ScrollReveal>
+              <div className="text-center mb-14">
+                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">Resume guides for freshers</h2>
+                <p className="text-[var(--fg-muted)] max-w-lg mx-auto">Plain advice on writing a first resume, understanding ATS scores, and getting the format right.</p>
+              </div>
+            </ScrollReveal>
+            <div className="grid sm:grid-cols-3 gap-5">
+              {guides.map((g, i) => (
+                <ScrollReveal key={g.slug} delay={i * 0.08}>
+                  <Link
+                    href={`/blog/${g.slug}`}
+                    className="block rounded-2xl border border-[var(--border)] p-6 h-full hover:border-[var(--accent)]/40 hover:shadow-lg transition-all"
+                  >
+                    <div className="text-xs font-semibold text-[var(--accent)] mb-2">{g.category}</div>
+                    <h3 className="font-bold mb-2 leading-snug">{g.title}</h3>
+                    <p className="text-sm text-[var(--fg-muted)] leading-relaxed">{g.excerpt}</p>
+                  </Link>
+                </ScrollReveal>
+              ))}
+            </div>
+            <div className="text-center mt-10">
+              <Link href="/blog" className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent)] hover:underline">
+                See all guides <ArrowRight size={15} />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* FAQ: same content feeds the FAQPage schema above */}
+      <section id="faq" className="max-w-3xl mx-auto px-5 py-20 sm:py-28">
+        <ScrollReveal>
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-10 text-center">Frequently asked questions</h2>
+        </ScrollReveal>
+        <div className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+          {FAQS.map((f) => (
+            <details key={f.q} className="group py-5">
+              <summary className="cursor-pointer list-none font-semibold flex justify-between gap-4">
+                {f.q}
+                <span aria-hidden className="text-[var(--accent)] group-open:rotate-45 transition-transform">+</span>
+              </summary>
+              <p className="mt-3 text-sm text-[var(--fg-muted)] leading-relaxed">{f.a}</p>
+            </details>
+          ))}
+        </div>
       </section>
 
       <section className="max-w-4xl mx-auto px-5 py-20 sm:py-28">
