@@ -1,0 +1,164 @@
+.app-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--bg2);
+  border-right: 1.5px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 20px 12px;
+  position: sticky; top: 0; height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-top { padding: 0 8px 20px; border-bottom: 1.5px solid var(--border); margin-bottom: 12px; }
+
+.sidebar-logo { display: flex; align-items: center; gap: 10px; }
+.sidebar-logo-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--blue); color: white;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sidebar-logo-text { font-size: 1rem; font-weight: 800; letter-spacing: -0.02em; }
+
+.sidebar-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+
+.sidebar-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 8px;
+  font-size: 0.875rem; font-weight: 500; color: var(--text3);
+  transition: var(--transition);
+  text-decoration: none;
+}
+.sidebar-link:hover { background: var(--bg3); color: var(--text); }
+.sidebar-link.active { background: var(--blue-bg); color: var(--blue); font-weight: 600; }
+
+.sidebar-bottom { border-top: 1.5px solid var(--border); padding-top: 16px; margin-top: auto; }
+.sidebar-user { display: flex; align-items: center; gap: 10px; padding: 0 4px; }
+.sidebar-user-info { overflow: hidden; }
+.sidebar-user-name { font-size: 0.875rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-user-email { font-size: 0.75rem; color: var(--text4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── MAIN ── */
+.main-area { padding: 28px 32px; overflow-y: auto; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 28px;
+}
+.topbar-title { font-size: 1.375rem; font-weight: 800; letter-spacing: -0.02em; }
+.topbar-sub { font-size: 0.8125rem; color: var(--text4); margin-top: 2px; }
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+/* ── STATS ── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 16px; margin-bottom: 32px;
+}
+.stat-card {
+  background: var(--bg2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.stat-card-icon {
+  width: 42px; height: 42px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.stat-icon-blue { background: var(--blue-bg); color: var(--blue); }
+.stat-icon-green { background: var(--success-bg); color: var(--success); }
+.stat-icon-purple { background: rgba(139,92,246,0.08); color: #8b5cf6; }
+.stat-icon-orange { background: rgba(245,158,11,0.08); color: var(--warning); }
+.stat-card-n { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.stat-card-l { font-size: 0.8rem; color: var(--text3); margin-top: 3px; }
+
+/* ── RESUME GRID ── */
+.resume-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.resume-card {
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  transition: var(--transition);
+  cursor: pointer;
+}
+.resume-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-blue); border-color: var(--blue-border); }
+
+/* Miniature resume preview */
+.resume-card-preview {
+  background: linear-gradient(160deg, var(--bg3) 0%, var(--bg) 100%);
+  padding: 20px;
+  height: 160px;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1.5px solid var(--border);
+}
+[data-theme="dark"] .resume-card-preview {
+  background: linear-gradient(160deg, #162032 0%, #0f172a 100%);
+}
+.rcp-lines { display: flex; flex-direction: column; gap: 6px; }
+.rcp-name { font-size: 0.75rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.rcp-line { height: 5px; background: var(--border); border-radius: 3px; }
+.rcp-line-lg { width: 80%; }
+.rcp-line-md { width: 65%; }
+.rcp-line-sm { width: 50%; }
+.rcp-divider { height: 1px; background: var(--blue); opacity: 0.3; margin: 4px 0; }
+.rcp-block { height: 5px; width: 30%; background: var(--blue); opacity: 0.5; border-radius: 3px; }
+
+.resume-card-overlay {
+  position: absolute; inset: 0;
+  background: rgba(37,99,235,0.85);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  backdrop-filter: blur(4px);
+}
+.resume-card:hover .resume-card-overlay { opacity: 1; }
+
+.resume-card-info { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.resume-card-title { font-size: 0.875rem; font-weight: 700; line-height: 1.3; }
+.resume-card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ats-pill {
+  font-size: 0.7rem; font-weight: 700;
+  color: var(--success); background: var(--success-bg);
+  border: 1px solid rgba(16,185,129,0.2);
+  padding: 2px 8px; border-radius: 100px;
+}
+.resume-card-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 16px;
+  padding: 80px 24px; text-align: center;
+  background: var(--bg2); border: 1.5px dashed var(--border);
+  border-radius: var(--radius-xl);
+}
+.empty-state-icon {
+  width: 88px; height: 88px; border-radius: 50%;
+  background: var(--blue-bg); display: flex; align-items: center; justify-content: center;
+  border: 2px dashed var(--blue-border);
+}
+.empty-state h3 { font-size: 1.25rem; font-weight: 700; }
+.empty-state p { color: var(--text3); max-width: 360px; font-size: 0.9375rem; }
+
+/* ── MOBILE ── */
+@media (max-width: 1024px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .main-area { padding: 20px 16px; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+}

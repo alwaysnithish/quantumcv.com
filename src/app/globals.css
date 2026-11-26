@@ -1,0 +1,358 @@
+@import "tailwindcss";
+
+/* Tailwind v4 CSS-first dark mode: toggle via .dark class on <html>,
+   controlled by next-themes (see theme-provider.tsx). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ═══════════════════════════════════════════════════════════
+   Windows 11 "Fluent" design layer — Mica / Acrylic / Bloom.
+
+   Every page already styles itself with the semantic variables below
+   (bg-[var(--card)], border-[var(--border)] …), so re-theming the variables
+   plus the few attribute selectors further down gives the whole site —
+   homepage, builder UI, analyser, pricing, auth, dashboard, tools — one
+   cohesive translucent look without touching each page.
+   ═══════════════════════════════════════════════════════════ */
+:root {
+  --accent: #1d9bf0;
+  --accent-hover: #1a8cd8;
+
+  --fg: #0b1220;
+  --fg-muted: #4b5a70;
+
+  /* Acrylic surfaces (translucent, blurred by the rules below) */
+  --bg: rgba(244, 248, 255, 0.55);
+  --bg-subtle: rgba(255, 255, 255, 0.42);
+  --card: rgba(255, 255, 255, 0.62);
+  --field: rgba(255, 255, 255, 0.6);
+  --border: rgba(15, 23, 42, 0.11);
+  --glass-edge: rgba(255, 255, 255, 0.35);
+  --glass-edge-strong: rgba(255, 255, 255, 0.8);
+  --glass-shadow: 0 8px 32px rgba(31, 55, 99, 0.12), 0 1px 2px rgba(31, 55, 99, 0.08);
+  --glass-blur: blur(24px) saturate(180%);
+  --mica-blur: blur(40px) saturate(160%);
+
+  /* Bloom wallpaper */
+  --wall-base: #e7eefb;
+  --wall-1: rgba(80, 150, 255, 0.55);
+  --wall-2: rgba(168, 112, 255, 0.4);
+  --wall-3: rgba(46, 214, 196, 0.38);
+  --wall-4: rgba(255, 140, 190, 0.34);
+}
+
+.dark {
+  --accent: #1d9bf0;
+  --accent-hover: #4db5f5;
+
+  --fg: #eef2f9;
+  --fg-muted: #9aa8bd;
+
+  --bg: rgba(12, 17, 32, 0.5);
+  --bg-subtle: rgba(255, 255, 255, 0.06);
+  --card: rgba(24, 31, 52, 0.55);
+  --field: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.13);
+  --glass-edge: rgba(255, 255, 255, 0.35);
+  --glass-edge-strong: rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.4);
+
+  --wall-base: #070b18;
+  --wall-1: rgba(32, 110, 255, 0.5);
+  --wall-2: rgba(130, 70, 255, 0.42);
+  --wall-3: rgba(14, 190, 180, 0.3);
+  --wall-4: rgba(255, 70, 150, 0.26);
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: 'Segoe UI Variable Text', 'Segoe UI Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  color: var(--fg);
+  background-color: var(--wall-base);
+  /* Bloom-inspired mesh: four soft radial "petals" fixed behind everything */
+  background-image:
+    radial-gradient(60vmax 50vmax at 12% 8%, var(--wall-1), transparent 60%),
+    radial-gradient(55vmax 45vmax at 88% 12%, var(--wall-2), transparent 62%),
+    radial-gradient(60vmax 50vmax at 80% 92%, var(--wall-3), transparent 60%),
+    radial-gradient(50vmax 45vmax at 8% 85%, var(--wall-4), transparent 62%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.2s ease;
+}
+
+/* Room for the floating taskbar / mobile dock (toggled by <Taskbar/>) */
+body.has-taskbar {
+  padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ── Glass utility classes ───────────────────────────────── */
+.glass {
+  background: var(--card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge-strong);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  border-radius: 12px;
+}
+.dark .glass {
+  border-color: var(--glass-edge);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.mica {
+  background: var(--bg);
+  backdrop-filter: var(--mica-blur);
+  -webkit-backdrop-filter: var(--mica-blur);
+}
+
+/* ── Re-skin existing Tailwind surfaces site-wide ─────────── */
+/* Any element that already used the card / page / subtle surface tokens
+   becomes real acrylic: blurred backdrop + crisp light edge + soft shadow. */
+[class*="bg-[var(--card)]"],
+[class*="bg-[var(--bg)]"],
+[class*="bg-[var(--bg-subtle)]"] {
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+/* …except full-page wrappers & huge sections, where blur is invisible and costly. */
+[class*="min-h-screen"][class*="bg-[var(--bg)]"],
+section[class*="bg-[var(--bg-subtle)]"],
+.builder-desk,
+.builder-paper {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+/* Page wrappers should show the wallpaper, not a wash over it. */
+[class*="min-h-screen"][class*="bg-[var(--bg)]"] {
+  background: transparent;
+}
+[class*="bg-[var(--card)]"][class*="rounded"] {
+  border-color: var(--glass-edge-strong);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.dark [class*="bg-[var(--card)]"][class*="rounded"] {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Sticky nav = Mica */
+header[class*="sticky"] {
+  background: var(--bg);
+  backdrop-filter: var(--mica-blur);
+  -webkit-backdrop-filter: var(--mica-blur);
+}
+
+/* Form fields: acrylic with a Windows-style accent underline on focus */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+textarea,
+select {
+  background-color: var(--field);
+  color: var(--fg);
+  border-radius: 8px;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--fg-muted);
+  opacity: 0.75;
+}
+
+/* The resume sheet itself must stay a real white page. */
+.builder-paper,
+.builder-paper * {
+  --fg: #0f172a;
+}
+
+/* Smooth micro-interactions */
+button,
+a {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 160ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Scroll-reveal utility — elements start hidden/offset, animated in via
+   IntersectionObserver in scroll-reveal.tsx */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+::selection {
+  background: var(--accent);
+  color: white;
+}
+
+/* ── Windows app window ───────────────────────────────────── */
+.win-window {
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge-strong);
+  box-shadow: 0 24px 60px rgba(20, 40, 90, 0.18), 0 2px 6px rgba(20, 40, 90, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.dark .win-window {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.win-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding-left: 12px;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+}
+.win-ctl {
+  width: 46px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg);
+  background: transparent;
+}
+.win-ctl:hover {
+  background: rgba(127, 127, 127, 0.18);
+}
+.win-ctl.close:hover {
+  background: #c42b1c;
+  color: #fff;
+}
+
+.win-window.is-maximized {
+  background: rgba(255, 255, 255, 0.92);          /* light: raise for more solid */
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+}
+.dark .win-window.is-maximized {
+  background: rgba(14, 19, 36, 0.94);             /* dark */
+}
+/* ── Floating taskbar (desktop) + glass dock (mobile) ─────── */
+.win-taskbar {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 14px;
+  background: var(--card);
+  backdrop-filter: var(--mica-blur);
+  -webkit-backdrop-filter: var(--mica-blur);
+  border: 1px solid var(--glass-edge-strong);
+  box-shadow: 0 12px 40px rgba(20, 40, 90, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.dark .win-taskbar {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.win-task {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg);
+  white-space: nowrap;
+}
+.win-task:hover {
+  background: rgba(127, 127, 127, 0.16);
+}
+.win-task[aria-current="page"] {
+  background: rgba(127, 127, 127, 0.14);
+}
+.win-task[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 16px;
+  height: 3px;
+  margin-left: -8px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+
+@media (max-width: 767px) {
+  .win-taskbar {
+    left: 10px;
+    right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    transform: none;
+    justify-content: space-between;
+    padding: 6px;
+    border-radius: 18px;
+  }
+  .win-task {
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 2px;
+    font-size: 10px;
+    min-width: 0;
+  }
+  .win-task .label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* ── Accessibility / fallbacks ────────────────────────────── */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --bg: #f4f8ff;
+    --bg-subtle: #eef3fb;
+    --card: #ffffff;
+    --field: #ffffff;
+  }
+  .dark {
+    --bg: #0b1020;
+    --bg-subtle: #141a2e;
+    --card: #161d33;
+    --field: #1c2440;
+  }
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root { --bg: rgba(244, 248, 255, 0.92); --card: rgba(255, 255, 255, 0.94); }
+  .dark { --bg: rgba(12, 17, 32, 0.94); --card: rgba(24, 31, 52, 0.95); }
+}
+
+/* Glass range/scroll polish */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgba(127, 127, 127, 0.35); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(127, 127, 127, 0.55); background-clip: padding-box; border: 2px solid transparent; }

@@ -1,0 +1,239 @@
+/* src/app/builder/canvas.css
+   Port of the interactive-element styles from the original builder.css:
+   section controls, drag handles, bullet/skill enhance buttons, table
+   resize handle, chat panel, template gallery, toasts.
+
+   Design notes: the accent color is reserved for primary actions, active
+   states, and focus — hover states on secondary chrome use neutral tone
+   shifts instead, so the one accent color still reads as meaningful when
+   it appears. Elevation is reserved for the paper surface and floating
+   UI (chat, toasts, modals); flat chrome (sidebar, controls) stays flat. */
+
+[data-sec-id] { position: relative; }
+[data-sec-id]:hover .sec-controls,
+[data-sec-id]:focus-within .sec-controls { opacity: 1; }
+[data-sec-id]:hover .sec-drag-handle,
+[data-sec-id]:focus-within .sec-drag-handle { opacity: 1; }
+
+.sec-controls {
+  position: absolute;
+  right: -40px;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.sec-ctrl-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.1s ease;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+.sec-ctrl-btn:hover { background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; }
+.sec-ctrl-btn:active { transform: scale(0.92); }
+.sec-ctrl-btn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+.sec-ctrl-btn.del:hover { background: #fef2f2; border-color: #ef4444; color: #ef4444; }
+
+.sec-drag-handle {
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: grab;
+  color: #cbd5e1;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.12s ease;
+  padding: 4px;
+}
+.sec-drag-handle:hover { color: #94a3b8; }
+.sec-drag-handle:active { cursor: grabbing; }
+
+[data-sec-id].dragging { opacity: 0.4; }
+[data-sec-id].drag-over { outline: 2px dashed #2563eb; outline-offset: 2px; border-radius: 6px; }
+[data-sec-id].flash { animation: flash-highlight 1.2s ease; }
+@keyframes flash-highlight {
+  0% { background: rgba(37, 99, 235, 0.08); }
+  100% { background: transparent; }
+}
+
+.bullet-actions { display: none; gap: 3px; align-items: center; flex-shrink: 0; }
+.bullet-enhance-btn {
+  font-size: 0.62rem;
+  padding: 2px 6px;
+  border: 1.5px solid #bfdbfe;
+  border-radius: 5px;
+  background: #eff6ff;
+  color: #2563eb;
+  cursor: pointer;
+  white-space: nowrap;
+  font-weight: 600;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+.bullet-enhance-btn:hover { background: #2563eb; color: white; }
+.bullet-enhance-btn:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+
+.skill-enhance-btn {
+  font-size: 0.6rem;
+  padding: 1px 5px;
+  border: 1px solid #e2e8f0;
+  border-radius: 5px;
+  background: none;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: border-color 0.12s ease, color 0.12s ease, background-color 0.12s ease;
+}
+.skill-enhance-btn:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+
+.add-item-btn {
+  width: 100%;
+  padding: 7px;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 6px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.76rem;
+  cursor: pointer;
+  transition: border-color 0.12s ease, color 0.12s ease, background-color 0.12s ease;
+  margin-top: 4px;
+}
+.add-item-btn:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+.add-item-btn:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+
+.tbl-resize:hover { background: #2563eb44; }
+
+/* Skill bars in resume */
+.rp-sbar-item { margin-bottom: 5px; }
+.rp-sbar-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3px;
+}
+.rp-sbar-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  outline: none;
+  cursor: text;
+}
+.rp-sbar-right { display: flex; align-items: center; gap: 5px; }
+.rp-sbar-pct { font-size: 0.65rem; color: #94a3b8; font-family: monospace; }
+.rp-sbar-track {
+  height: 5px;
+  background: #e2e8f0;
+  border-radius: 99px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.rp-sbar-fill { height: 100%; border-radius: 99px; transition: width 0.2s ease; }
+
+/* Skill dots */
+.rp-sdot-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.rp-sdot-name { font-size: 0.78rem; font-weight: 600; flex: 1; outline: none; cursor: text; }
+.rp-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  border: 1.5px solid #cbd5e1;
+  background: transparent;
+  display: inline-block;
+}
+.rp-dot.filled { background: currentColor; border-color: currentColor; }
+.rp-dot:hover { transform: scale(1.3); }
+
+.skill-step-btn, .skill-move-btn {
+  font-size: 0.6rem;
+  width: 15px;
+  height: 15px;
+  line-height: 1;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background: none;
+  color: #64748b;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: border-color 0.12s ease, color 0.12s ease, background-color 0.12s ease;
+}
+.skill-step-btn:hover, .skill-move-btn:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+
+/* ── Canvas surface: the paper gets real elevation and a quiet desk
+   texture behind it — the one deliberate "signature" touch in this UI,
+   kept subtle so it reads as craft rather than decoration. ── */
+.builder-desk {
+  background-image: radial-gradient(circle, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.builder-paper {
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 12px 28px -8px rgba(15, 23, 42, 0.16),
+    0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+/* ── Toasts ── */
+#toast-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+.toast {
+  background: #0f172a;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  animation: toast-in 0.25s ease;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.toast.out { opacity: 0; transform: translateY(8px); }
+.toast-success { background: #166534; }
+.toast-error { background: #991b1b; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sec-controls,
+  .sec-drag-handle,
+  .sec-ctrl-btn,
+  .bullet-enhance-btn,
+  .skill-enhance-btn,
+  .add-item-btn,
+  .rp-dot,
+  .rp-sbar-fill,
+  .toast {
+    transition: none !important;
+    animation: none !important;
+  }
+}

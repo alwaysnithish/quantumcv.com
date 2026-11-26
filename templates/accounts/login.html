@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Sign In{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}" />
+{% endblock %}
+
+{% block body %}
+<div class="auth-root">
+
+  <!-- Left panel: branding -->
+  <div class="auth-brand">
+    <div class="auth-brand-inner">
+      <div class="brand-logo">
+        <div class="brand-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M14 7L21 11V17L14 21L7 17V11L14 7Z" fill="white" opacity="0.3"/>
+            <circle cx="14" cy="14" r="3" fill="white"/>
+          </svg>
+        </div>
+        <span class="brand-name">QuantumCV</span>
+      </div>
+
+      <div class="brand-headline">
+        Build resumes that get you <span class="brand-highlight">hired.</span>
+      </div>
+      <p class="brand-sub">AI-powered architecture that rewrites your career story — optimized for ATS, recruiters, and every job you want.</p>
+
+      <div class="brand-features">
+        <div class="brand-feature">
+          <div class="brand-feature-icon">✦</div>
+          <div>
+            <div class="brand-feature-title">Gemini AI Engine</div>
+            <div class="brand-feature-desc">Smart section ordering, STAR bullets, keyword alignment</div>
+          </div>
+        </div>
+        <div class="brand-feature">
+          <div class="brand-feature-icon">◈</div>
+          <div>
+            <div class="brand-feature-title">ATS Optimized</div>
+            <div class="brand-feature-desc">Naukri, LinkedIn, and global job board ready</div>
+          </div>
+        </div>
+        <div class="brand-feature">
+          <div class="brand-feature-icon">⬡</div>
+          <div>
+            <div class="brand-feature-title">Version History</div>
+            <div class="brand-feature-desc">Save, edit, and restore any version of your resume</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="brand-stats">
+        <div class="brand-stat"><span class="brand-stat-n">2.4K+</span><span class="brand-stat-l">Resumes Built</span></div>
+        <div class="brand-stat-div"></div>
+        <div class="brand-stat"><span class="brand-stat-n">91%</span><span class="brand-stat-l">Avg ATS Score</span></div>
+        <div class="brand-stat-div"></div>
+        <div class="brand-stat"><span class="brand-stat-n">Free</span><span class="brand-stat-l">No Card Needed</span></div>
+      </div>
+    </div>
+
+    <!-- Decorative geometric shapes -->
+    <div class="brand-geo brand-geo-1"></div>
+    <div class="brand-geo brand-geo-2"></div>
+    <div class="brand-geo brand-geo-3"></div>
+  </div>
+
+  <!-- Right panel: auth form -->
+  <div class="auth-panel">
+    <div class="auth-panel-top">
+      <button class="theme-toggle" onclick="window.QTheme.toggle()" title="Toggle theme" aria-label="Toggle dark mode">
+        <div class="theme-toggle-knob">
+          <span class="theme-icon-light">☀</span>
+          <span class="theme-icon-dark" style="display:none">☾</span>
+        </div>
+      </button>
+    </div>
+
+    <div class="auth-form-wrap">
+      <!-- Step 1: Email -->
+      <div id="step-email" class="auth-step active">
+        <div class="auth-form-header">
+          <h1>Welcome back</h1>
+          <p>Enter your email to receive a verification code.</p>
+        </div>
+
+        <div class="auth-form">
+          <div class="form-group">
+            <label class="form-label" for="email-input">Email address</label>
+            <input
+              type="email" id="email-input" class="form-input"
+              placeholder="you@gmail.com"
+              autocomplete="email" autofocus
+            />
+            <span class="form-error" id="email-error"></span>
+          </div>
+
+          <button class="btn btn-primary btn-xl w-full" id="send-otp-btn" onclick="sendOTP()">
+            <span class="spinner"></span>
+            <span class="btn-text">Continue with Email</span>
+          </button>
+
+          <p class="auth-privacy">
+            By continuing, you agree to our <a href="#">Terms</a>. We'll send a one-time code — no password needed.
+          </p>
+        </div>
+      </div>
+
+      <!-- Step 2: OTP -->
+      <div id="step-otp" class="auth-step">
+        <div class="auth-back" onclick="goBack()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Back
+        </div>
+
+        <div class="auth-form-header">
+          <h1>Check your email</h1>
+          <p>We sent a 6-digit code to <strong id="email-display"></strong></p>
+        </div>
+
+        <div class="auth-form">
+          <div class="form-group">
+            <label class="form-label">Name <span class="form-hint">(optional, for new accounts)</span></label>
+            <input type="text" id="name-input" class="form-input" placeholder="Your full name" autocomplete="name" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Verification code</label>
+            <div class="otp-inputs" id="otp-inputs">
+              <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+              <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+              <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+              <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+              <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+              <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+            </div>
+            <span class="form-error" id="otp-error"></span>
+          </div>
+
+          <button class="btn btn-primary btn-xl w-full" id="verify-btn" onclick="verifyOTP()">
+            <span class="spinner"></span>
+            <span class="btn-text">Verify &amp; Continue</span>
+          </button>
+
+          <div class="resend-wrap">
+            <span class="text-muted text-sm">Didn't receive it?</span>
+            <button class="btn btn-ghost btn-sm" id="resend-btn" onclick="resendOTP()" disabled>
+              Resend code (<span id="resend-timer">60</span>s)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/auth.js' %}"></script>
+{% endblock %}
