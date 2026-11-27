@@ -15,7 +15,7 @@ export interface GameProps { onScore: (n: number) => void; onRoundEnd: () => voi
 export interface GameDef {
   id: string;
   name: string;
-  category: 'Racing' | 'Puzzle' | 'Simulation' | 'Arcade' | 'Trivia';
+  category: 'Racing' | 'Puzzle' | 'Simulation' | 'Arcade' | 'Trivia' | 'Runner';
   emoji: string;
   blurb: string;
   C: ComponentType<GameProps>;
