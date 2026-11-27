@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse, after } from 'next/server';
 import { onScanCompleted } from '@/lib/user-lifecycle';
+import { cookies } from 'next/headers';
+import { trackServerEvent } from '@/lib/analytics/server';
 import { requireUser } from '@/lib/require-user';
 import { analyzeResumeDeep } from '@/lib/gemini';
 import { getResumeForUser, parseGeneratedData } from '@/lib/resumes';
@@ -36,6 +38,8 @@ export async function POST(request: NextRequest) {
   try {
     const report = await analyzeResumeDeep({ resumeData, resumeText, document, role, jobDescription });
     const user = auth;
+    const vidCookie = (await cookies()).get('qcv_vid')?.value;
+    after(() => trackServerEvent('scan', vidCookie, user.id));
     after(() => onScanCompleted({ id: user.id, email: user.email, fullName: user.fullName, credits: user.credits }, report, role));
     return NextResponse.json({ success: true, report });
   } catch (error) {

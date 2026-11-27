@@ -2,6 +2,7 @@ import { NextRequest, NextResponse, after } from 'next/server';
 import { cookies } from 'next/headers';
 import { onNewUser } from '@/lib/user-lifecycle';
 import { REF_COOKIE } from '@/lib/referrals';
+import { trackServerEvent } from '@/lib/analytics/server';
 import { SIGNUP_BONUS_CREDITS } from '@/lib/credit-config';
 import { OAuth2Client } from 'google-auth-library';
 import { db } from '@/db/client';
@@ -99,6 +100,8 @@ export async function POST(request: NextRequest) {
   if (isNew) {
     const refCookie = (await cookies()).get(REF_COOKIE)?.value ?? null;
     const created = user;
+    const vidCookie = (await cookies()).get('qcv_vid')?.value;
+    after(() => trackServerEvent('signup', vidCookie, created.id));
     after(() => onNewUser({ id: created.id, email: created.email, fullName: created.fullName || name }, refCookie));
   }
 

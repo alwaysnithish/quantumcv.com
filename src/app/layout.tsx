@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import RouteLoadingBar from '@/components/route-loading-bar';
 import Taskbar from '@/components/win/taskbar';
 import ReferralCapture from '@/components/referral-capture';
+import AnalyticsTracker from '@/components/analytics-tracker';
 import './globals.css';
 
 const SITE_URL = 'https://quantumcv.app';
@@ -100,6 +101,7 @@ gtag('config', 'G-GN7CM2GRR2');`}
             <RouteLoadingBar />
           </Suspense>
           <ReferralCapture />
+          <AnalyticsTracker />
           {children}
           <Taskbar />
         </ThemeProvider>

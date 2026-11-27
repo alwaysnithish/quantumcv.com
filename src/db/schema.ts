@@ -8,7 +8,7 @@
  * work with string comparisons/new Date().toISOString()) — no application
  * code needed to change because of this migration.
  */
-import { pgTable, text, integer, boolean, timestamp, serial } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, boolean, timestamp, serial, index } from 'drizzle-orm/pg-core';
 
 // ── users ──────────────────────────────────────────────
 // Mirrors accounts/models.py::User (email-based auth, no password,
@@ -200,3 +200,67 @@ export const rateLimits = pgTable('rate_limits', {
   count: integer('count').notNull().default(0),
   windowStart: timestamp('window_start', { mode: 'string', withTimezone: true }).notNull().defaultNow(),
 });
+
+
+// ── first-party analytics ──────────────────────────────
+// One row per page view. The browser pings the row while the page is open,
+// so `durationS` (active seconds), `maxScroll` and `lastSeen` (live users)
+// are all kept on the same row. Admins are never recorded (see /api/collect).
+export const analyticsPageviews = pgTable(
+  'analytics_pageviews',
+  {
+    pvid: text('pvid').primaryKey(),
+    ts: timestamp('ts', { mode: 'string', withTimezone: true }).notNull().defaultNow(),
+    lastSeen: timestamp('last_seen', { mode: 'string', withTimezone: true }).notNull().defaultNow(),
+    vid: text('vid').notNull(),
+    sid: text('sid').notNull(),
+    userId: text('user_id'),
+    path: text('path').notNull(),
+    title: text('title').notNull().default(''),
+    referrer: text('referrer').notNull().default(''),
+    refHost: text('ref_host').notNull().default(''),
+    refSource: text('ref_source').notNull().default('direct'),
+    utmSource: text('utm_source').notNull().default(''),
+    utmMedium: text('utm_medium').notNull().default(''),
+    utmCampaign: text('utm_campaign').notNull().default(''),
+    country: text('country').notNull().default('XX'),
+    region: text('region').notNull().default(''),
+    city: text('city').notNull().default(''),
+    ipMasked: text('ip_masked').notNull().default(''),
+    ipHash: text('ip_hash').notNull().default(''),
+    device: text('device').notNull().default('desktop'),
+    browser: text('browser').notNull().default(''),
+    os: text('os').notNull().default(''),
+    screenW: integer('screen_w').notNull().default(0),
+    lang: text('lang').notNull().default(''),
+    isEntry: boolean('is_entry').notNull().default(false),
+    durationS: integer('duration_s').notNull().default(0),
+    maxScroll: integer('max_scroll').notNull().default(0),
+  },
+  (t) => [
+    index('pv_ts_idx').on(t.ts),
+    index('pv_vid_idx').on(t.vid),
+    index('pv_sid_idx').on(t.sid),
+    index('pv_last_seen_idx').on(t.lastSeen),
+  ]
+);
+
+// Clicks and conversions (signup, first scan …).
+export const analyticsEvents = pgTable(
+  'analytics_events',
+  {
+    id: serial('id').primaryKey(),
+    ts: timestamp('ts', { mode: 'string', withTimezone: true }).notNull().defaultNow(),
+    vid: text('vid').notNull().default(''),
+    sid: text('sid').notNull().default(''),
+    pvid: text('pvid').notNull().default(''),
+    type: text('type').notNull(), // click | signup | scan | …
+    path: text('path').notNull().default(''),
+    label: text('label').notNull().default(''),
+    href: text('href').notNull().default(''),
+    outbound: boolean('outbound').notNull().default(false),
+    userId: text('user_id'),
+    country: text('country').notNull().default(''),
+  },
+  (t) => [index('ev_ts_idx').on(t.ts), index('ev_type_idx').on(t.type)]
+);

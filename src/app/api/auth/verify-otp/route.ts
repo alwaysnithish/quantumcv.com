@@ -2,6 +2,7 @@ import { NextRequest, NextResponse, after } from 'next/server';
 import { cookies } from 'next/headers';
 import { onNewUser } from '@/lib/user-lifecycle';
 import { REF_COOKIE } from '@/lib/referrals';
+import { trackServerEvent } from '@/lib/analytics/server';
 import { verifyOtp } from '@/lib/otp';
 import {
   getPendingOtpEmail,
@@ -52,6 +53,8 @@ export async function POST(request: NextRequest) {
 
   if (created) {
     const refCookie = (await cookies()).get(REF_COOKIE)?.value ?? null;
+    const vidCookie = (await cookies()).get('qcv_vid')?.value;
+    after(() => trackServerEvent('signup', vidCookie, user.id));
     after(() => onNewUser({ id: user.id, email: user.email, fullName: fullName || user.fullName }, refCookie));
   }
 

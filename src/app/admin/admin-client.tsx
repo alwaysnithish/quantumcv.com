@@ -92,7 +92,10 @@ export default function AdminClient({ adminName }: { adminName: string }) {
             <div className="hidden sm:block h-4 w-px bg-[var(--border)]" />
             <span className="font-extrabold tracking-tight truncate">Admin — {adminName}</span>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <a href="/admin/analytics" className="rounded-full bg-[var(--accent)] px-3.5 py-1.5 text-xs font-bold text-white hover:bg-[var(--accent-hover)]">Analytics</a>
+            <ThemeToggle />
+          </div>
         </div>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex gap-1 overflow-x-auto">
           {[

@@ -22,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/tools`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
     ...TOOLS.map((t) => ({ url: `${SITE_URL}/tools/${t.slug}`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.85 })),
     { url: `${SITE_URL}/refer`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${SITE_URL}/games`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
   ];
 
   return [
